@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>探索圖鑑</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans TC', sans-serif; background: #f5f4f0; min-height: 100vh; }
+.app { max-width: 480px; margin: 0 auto; padding: 0 0 3rem; }
+.header { text-align: center; padding: 1.5rem 1rem 0.75rem; }
+.header h1 { font-size: 22px; font-weight: 600; color: #1a1a1a; letter-spacing: 0.05em; }
+.tabs { display: flex; gap: 6px; padding: 0 1rem 0.75rem; }
+.tab { flex: 1; padding: 8px 0; font-size: 13px; font-weight: 500; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #888; cursor: pointer; text-align: center; transition: all 0.15s; }
+.tab.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+.region-info { text-align: center; font-size: 13px; color: #888; margin-bottom: 0.75rem; padding: 0 1rem; }
+.region-info strong { color: #1a1a1a; }
+.section-title { font-size: 13px; font-weight: 500; color: #aaa; text-align: center; margin-bottom: 0.75rem; letter-spacing: 0.08em; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 1rem; }
+.card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; overflow: hidden; cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; position: relative; }
+.card:active { transform: scale(0.97); }
+.card.collected { border-color: #1D9E75; }
+.card-top { padding: 5px 7px 2px; display: flex; justify-content: space-between; align-items: center; }
+.cat-badge { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 10px; }
+.cat-plant { background: #e8f5e2; color: #2d7a1f; }
+.cat-landscape { background: #e3eef9; color: #1a5fa0; }
+.cat-culture { background: #fef3e2; color: #a06010; }
+.card-img { height: 64px; display: flex; align-items: center; justify-content: center; font-size: 34px; background: #f9f8f5; position: relative; }
+.card.uncollected .card-img { filter: grayscale(1) opacity(0.35); }
+.collected-badge { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); background: #1D9E75; color: #fff; font-size: 9px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; z-index: 2; }
+.card-body { padding: 5px 7px 8px; }
+.card-name { font-size: 12px; font-weight: 600; color: #1a1a1a; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card.uncollected .card-name { color: #bbb; }
+.card-desc { font-size: 10px; color: #999; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card.uncollected .card-desc { color: #ccc; }
+.card-num { font-size: 10px; color: #ccc; margin-top: 3px; }
+
+/* Modal */
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: flex-end; justify-content: center; }
+.modal-bg.open { display: flex; }
+.modal { background: #fff; border-radius: 20px 20px 0 0; padding: 1.25rem 1.25rem 2.5rem; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+.modal-handle { width: 36px; height: 4px; background: #e0e0e0; border-radius: 2px; margin: 0 auto 1.25rem; }
+.modal-cat { margin-bottom: 6px; }
+.modal-name { font-size: 20px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; }
+.modal-desc { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 1.25rem; }
+.modal-photo { width: 100%; height: 180px; border-radius: 12px; border: 2px dashed #ddd; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; margin-bottom: 1rem; cursor: pointer; font-size: 14px; color: #aaa; background: #f9f8f5; overflow: hidden; }
+.modal-photo img { width: 100%; height: 100%; object-fit: cover; }
+.btn-row { display: flex; gap: 8px; }
+.btn { flex: 1; padding: 13px 0; border-radius: 10px; font-size: 15px; font-weight: 500; border: 1px solid #ddd; background: #fff; color: #333; cursor: pointer; text-align: center; transition: background 0.1s; }
+.btn:active { background: #f5f5f5; }
+.btn-primary { background: #1D9E75; color: #fff; border-color: #1D9E75; }
+.btn-primary:disabled { background: #e0e0e0; color: #aaa; border-color: #e0e0e0; cursor: not-allowed; }
+.btn-primary:not(:disabled):active { background: #178a65; }
+.ai-status { display: none; flex-direction: column; align-items: center; gap: 10px; padding: 1.25rem 0 0.75rem; text-align: center; }
+.ai-status.show { display: flex; }
+.spinner { width: 32px; height: 32px; border: 3px solid #e0e0e0; border-top-color: #1D9E75; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.ai-label { font-size: 13px; color: #888; }
+.result-box { display: none; border-radius: 10px; padding: 12px 14px; margin-bottom: 1rem; }
+.result-box.show { display: block; }
+.result-pass { background: #e6f7f1; }
+.result-pass p { color: #0d6644; font-size: 14px; line-height: 1.5; }
+.result-fail { background: #fdecea; }
+.result-fail p { color: #8b1a1a; font-size: 14px; line-height: 1.5; }
+.collected-photo-preview { width: 100%; height: 150px; border-radius: 12px; object-fit: cover; margin-bottom: 0.75rem; border: 1px solid #e8e8e8; }
+.collected-info { font-size: 12px; color: #aaa; margin-bottom: 1rem; }
+.camera-icon { font-size: 32px; margin-bottom: 4px; }
+input[type=file] { display: none; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header"><h1>探索圖鑑</h1></div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchRegion(0)">區域一</div>
+    <div class="tab" onclick="switchRegion(1)">區域二</div>
+    <div class="tab" onclick="switchRegion(2)">區域三</div>
+  </div>
+  <div class="region-info" id="region-info"></div>
+  <div class="section-title">圖鑑蒐集卡冊</div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="modal-bg" id="modal-bg" onclick="closeModalBg(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleFile(event)">
+
+<script>
+const REGIONS = [
+  { name: '山林初探', desc: '海拔300-800m的低山帶' },
+  { name: '清流與河谷的交會', desc: '沿溪谷地形探索' },
+  { name: '聚落與文化地景', desc: '傳統聚落與人文遺址' }
+];
+
+const ITEMS = [
+  [
+    { id:'r0c0', cat:'plant', name:'姑婆芋', emoji:'🌿', desc:'葉片寬大如芋，常見於溪邊潮濕處，葉柄有白色汁液', num:1 },
+    { id:'r0c1', cat:'landscape', name:'巨岩地形', emoji:'🪨', desc:'經長年風化形成的巨石群，苔蘚附生其上', num:2 },
+    { id:'r0c2', cat:'culture', name:'古道石階', emoji:'🪜', desc:'先民鑿山開路留下的石砌階梯，青苔覆蓋', num:3 },
+    { id:'r0c3', cat:'plant', name:'台灣山蘇', emoji:'🌱', desc:'附生於樹幹的鳥巢蕨，葉片光滑鮮綠', num:4 },
+    { id:'r0c4', cat:'landscape', name:'瀑布水簾', emoji:'💧', desc:'山壁間傾瀉而下的細流，形成薄如紗簾的水幕', num:5 },
+    { id:'r0c5', cat:'culture', name:'燒炭窯遺址', emoji:'🏚️', desc:'早期伐木時期留下的炭窯，石砌結構仍在', num:6 },
+    { id:'r0c6', cat:'plant', name:'筆筒樹', emoji:'🌳', desc:'高大樹蕨，樹幹留有葉痕形成獨特紋路', num:7 },
+    { id:'r0c7', cat:'landscape', name:'霧中林道', emoji:'🌫️', desc:'清晨林間瀰漫山嵐，光線穿透形成光柱', num:8 },
+    { id:'r0c8', cat:'culture', name:'山神廟', emoji:'⛩️', desc:'登山口附近小祠，是山林信仰的縮影', num:9 },
+  ],
+  [
+    { id:'r1c0', cat:'plant', name:'過溝菜蕨', emoji:'🌿', desc:'嫩芽頂端捲曲成捲曲狀，可食用', num:10 },
+    { id:'r1c1', cat:'landscape', name:'豆腐岩', emoji:'🪨', desc:'方格狀裂隙的豆腐岩與圓形壺穴', num:11 },
+    { id:'r1c2', cat:'culture', name:'擺渡體驗', emoji:'⛵', desc:'乘坐竹筏橫越溪流的傳統渡河方式', num:12 },
+    { id:'r1c3', cat:'plant', name:'野薑花', emoji:'🌸', desc:'形似蝴蝶的白色花朵，花香清幽', num:13 },
+    { id:'r1c4', cat:'landscape', name:'雙溪匯流', emoji:'🏞️', desc:'水色交融與寬闊河灘', num:14 },
+    { id:'r1c5', cat:'culture', name:'溪邊野炊', emoji:'🔥', desc:'在溪畔用石頭搭灶的野外炊事體驗', num:15 },
+    { id:'r1c6', cat:'plant', name:'台灣石蒜', emoji:'🌺', desc:'秋季開放的紅色花朵，葉片細長', num:16 },
+    { id:'r1c7', cat:'landscape', name:'老街河陌', emoji:'🏘️', desc:'依河陌地形而建的傳統聚落', num:17 },
+    { id:'r1c8', cat:'plant', name:'水同木', emoji:'🌳', desc:'成熟時粉紅色的幹生果', num:18 },
+  ],
+  [
+    { id:'r2c0', cat:'culture', name:'藺草編織', emoji:'🧺', desc:'傳統手工編織，以藺草製作帽席', num:19 },
+    { id:'r2c1', cat:'landscape', name:'梯田景觀', emoji:'🌾', desc:'順山勢開鑿的層層梯田，倒映天光', num:20 },
+    { id:'r2c2', cat:'plant', name:'龍眼老樹', emoji:'🌳', desc:'百年以上龍眼樹，枝幹蒼勁', num:21 },
+    { id:'r2c3', cat:'culture', name:'傳統製茶', emoji:'🍵', desc:'親手揉捻茶葉，感受製茶工序', num:22 },
+    { id:'r2c4', cat:'landscape', name:'石板屋聚落', emoji:'🏠', desc:'原住民傳統石板屋建築群', num:23 },
+    { id:'r2c5', cat:'plant', name:'台灣欒樹', emoji:'🍂', desc:'秋季轉紅的黃金風鈴木近親', num:24 },
+    { id:'r2c6', cat:'culture', name:'竹編工藝', emoji:'🎋', desc:'傳統竹編器物製作體驗', num:25 },
+    { id:'r2c7', cat:'landscape', name:'廢棄鐵道', emoji:'🛤️', desc:'蔓草覆蓋的舊糖鐵軌道遺跡', num:26 },
+    { id:'r2c8', cat:'plant', name:'咸豐草', emoji:'🌼', desc:'路邊常見的白色小野花，果實會沾黏', num:27 },
+  ]
+];
+
+const CAT_LABELS = { plant:'植物', landscape:'景觀', culture:'文化' };
+const CAT_CSS = { plant:'cat-plant', landscape:'cat-landscape', culture:'cat-culture' };
+
+let currentRegion = 0;
+let activeItem = null;
+let pendingPhoto = null;
+let collected = {};
+
+function load() {
+  try { collected = JSON.parse(localStorage.getItem('fieldguide_collected') || '{}'); } catch(e) { collected = {}; }
+}
+function save() {
+  try { localStorage.setItem('fieldguide_collected', JSON.stringify(collected)); } catch(e) {}
+}
+
+function countCollected(r) {
+  return ITEMS[r].filter(i => collected[i.id]).length;
+}
+
+function switchRegion(r) {
+  currentRegion = r;
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===r));
+  render();
+}
+
+function render() {
+  const r = currentRegion;
+  const total = ITEMS[r].length;
+  const done = countCollected(r);
+  document.getElementById('region-info').innerHTML =
+    `<strong>${REGIONS[r].name}</strong>　探索進度：${done} / ${total} 已蒐集`;
+
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  ITEMS[r].forEach(item => {
+    const col = collected[item.id];
+    const div = document.createElement('div');
+    div.className = 'card ' + (col ? 'collected' : 'uncollected');
+    div.onclick = () => openModal(item);
+    const imgContent = col && col.photo
+      ? `<img src="${col.photo}" style="width:100%;height:100%;object-fit:cover">`
+      : `<span>${item.emoji}</span>`;
+    div.innerHTML = `
+      <div class="card-top">
+        <span class="cat-badge ${CAT_CSS[item.cat]}">${CAT_LABELS[item.cat]}</span>
+      </div>
+      <div class="card-img">
+        ${imgContent}
+        ${col ? '<span class="collected-badge">已蒐集</span>' : ''}
+      </div>
+      <div class="card-body">
+        <div class="card-name">${col ? item.name : '???'}</div>
+        <div class="card-desc">${col ? item.desc : '拍照解鎖'}</div>
+        <div class="card-num">#${String(item.num).padStart(3,'0')}</div>
+      </div>`;
+    grid.appendChild(div);
+  });
+}
+
+function openModal(item) {
+  activeItem = item;
+  pendingPhoto = null;
+  const col = collected[item.id];
+  const modal = document.getElementById('modal-content');
+
+  if (col) {
+    modal.innerHTML = `
+      <div class="modal-cat"><span class="cat-badge ${CAT_CSS[item.cat]}">${CAT_LABELS[item.cat]}</span></div>
+      <div class="modal-name">${item.name}</div>
+      <div class="modal-desc">${item.desc}</div>
+      ${col.photo ? `<img class="collected-photo-preview" src="${col.photo}">` : ''}
+      <div class="collected-info">蒐集於 ${col.date}</div>
+      <button class="btn" onclick="closeModal()">關閉</button>`;
+  } else {
+    modal.innerHTML = `
+      <div class="modal-cat"><span class="cat-badge ${CAT_CSS[item.cat]}">${CAT_LABELS[item.cat]}</span></div>
+      <div class="modal-name">${item.name}</div>
+      <div class="modal-desc">${item.desc}</div>
+      <div class="modal-photo" id="photo-zone" onclick="triggerUpload()">
+        <div class="camera-icon">📷</div>
+        <span>點此拍照或上傳照片</span>
+      </div>
+      <div class="ai-status" id="ai-status">
+        <div class="spinner"></div>
+        <div class="ai-label">AI 辨識中...</div>
+      </div>
+      <div class="result-box" id="result-box"></div>
+      <div class="btn-row">
+        <button class="btn" onclick="closeModal()">取消</button>
+        <button class="btn btn-primary" id="submit-btn" disabled onclick="submitPhoto()">送出審核</button>
+      </div>`;
+  }
+
+  document.getElementById('modal-bg').classList.add('open');
+}
+
+function triggerUpload() {
+  document.getElementById('file-input').click();
+}
+
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    pendingPhoto = ev.target.result;
+    const zone = document.getElementById('photo-zone');
+    zone.innerHTML = `<img src="${pendingPhoto}" style="width:100%;height:100%;object-fit:cover">`;
+    document.getElementById('submit-btn').disabled = false;
+    document.getElementById('result-box').className = 'result-box';
+    document.getElementById('result-box').innerHTML = '';
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+function submitPhoto() {
+  const aiStatus = document.getElementById('ai-status');
+  const resultBox = document.getElementById('result-box');
+  const submitBtn = document.getElementById('submit-btn');
+  submitBtn.disabled = true;
+  aiStatus.classList.add('show');
+  resultBox.className = 'result-box';
+
+  setTimeout(() => {
+    aiStatus.classList.remove('show');
+    const pass = Math.random() > 0.15;
+    if (pass) {
+      resultBox.className = 'result-box result-pass show';
+      resultBox.innerHTML = `<p>✓ AI 辨識通過！照片中偵測到符合「${activeItem.name}」條件的內容，已加入圖鑑。</p>`;
+      const now = new Date();
+      const date = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
+      collected[activeItem.id] = { date, photo: pendingPhoto };
+      save();
+      setTimeout(() => { closeModal(); render(); }, 1800);
+    } else {
+      resultBox.className = 'result-box result-fail show';
+      resultBox.innerHTML = `<p>✗ 未能辨識出「${activeItem.name}」，請嘗試拍攝更清晰的照片或調整角度。</p>`;
+      submitBtn.disabled = false;
+    }
+  }, 2000);
+}
+
+function closeModal() {
+  document.getElementById('modal-bg').classList.remove('open');
+  activeItem = null;
+  pendingPhoto = null;
+}
+
+function closeModalBg(e) {
+  if (e.target === document.getElementById('modal-bg')) closeModal();
+}
+
+load();
+render();
+</script>
+</body>
+</html>
