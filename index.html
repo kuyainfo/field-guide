@@ -109,6 +109,7 @@ input[type=text]::placeholder{color:#5C7566}
 
 <div id="app"></div>
 <input type="file" id="cam" accept="image/*" capture="environment" class="hide">
+<input type="file" id="pick" accept="image/*" class="hide">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -302,7 +303,7 @@ setInterval(pump, 15000);
 
 /* ── 拍照 ── */
 var camTarget = null;
-document.getElementById("cam").addEventListener("change", function(e){
+function onPicked(e){
   var f = e.target.files && e.target.files[0];
   e.target.value = "";
   if(!f || !camTarget) return;
@@ -314,8 +315,10 @@ document.getElementById("cam").addEventListener("change", function(e){
       enqueue(id, full);
     });
   });
-});
-function shoot(id){ camTarget = id; document.getElementById("cam").click(); }
+}
+document.getElementById("cam").addEventListener("change", onPicked);
+document.getElementById("pick").addEventListener("change", onPicked);
+function shoot(id, src){ camTarget = id; document.getElementById(src === "lib" ? "pick" : "cam").click(); }
 
 /* ── 畫面 ── */
 function render(){
@@ -436,10 +439,14 @@ function pageTask(){
   }[st];
 
   var btn = "";
-  if(st === "todo")      btn = '<button class="btn" id="shoot">拍照</button>';
-  if(st === "rejected")  btn = '<button class="btn" id="shoot">重新拍照</button>';
-  if(st === "pending")   btn = '<button class="btn ghost" id="shoot">換一張照片</button>';
-  if(st === "uploading") btn = '<div class="bar"><i></i></div>';
+  if(st === "uploading"){
+    btn = '<div class="bar"><i></i></div>';
+  }else if(st !== "approved"){
+    var main = st === "rejected" ? "重新拍照" : st === "pending" ? "換一張照片" : "拍照";
+    var cls  = st === "pending" ? "btn ghost" : "btn";
+    btn = '<button class="' + cls + '" data-shoot="cam">' + main + '</button>'
+        + '<button class="btn ghost" data-shoot="lib">從相簿選照片</button>';
+  }
 
   return '<div class="topbar"><button class="back" id="bk">' + ICON_BACK + z.name + '</button></div>'
     + '<div class="hero">' + (th ? '<img src="' + th + '" alt="">' : ICON_CAM) + '</div>'
@@ -458,8 +465,9 @@ function bind(){
   Array.prototype.forEach.call(document.querySelectorAll("[data-task]"), function(b){
     b.onclick = function(){ go("task", { zone:view.zone, task:b.getAttribute("data-task") }); };
   });
-  var sh = document.getElementById("shoot");
-  if(sh) sh.onclick = function(){ shoot(view.task); };
+  Array.prototype.forEach.call(document.querySelectorAll("[data-shoot]"), function(b){
+    b.onclick = function(){ shoot(view.task, b.getAttribute("data-shoot")); };
+  });
 
   var rs = document.getElementById("reset");
   if(rs) rs.onclick = function(){
