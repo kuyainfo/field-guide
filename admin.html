@@ -61,6 +61,13 @@ tbody tr:hover{background:#14261D}
 @media (max-width:1000px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:560px){.grid{grid-template-columns:1fr}}
 .spacer{visibility:hidden}
+.zgroup{margin-bottom:10px}
+.zhead{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:9px 11px;border:1px solid var(--line);border-radius:3px;background:#152A20}
+.zhead:hover{background:#1A3226}
+.zhead .cnt{font-size:12.5px;color:var(--dim);margin-left:auto}
+.zhead .chev{font-size:11px;color:var(--dim);width:12px;text-align:center}
+.zgroup .grid{margin-top:10px;margin-bottom:14px}
 
 .shot{background:var(--p2);border:1px solid var(--line);border-radius:3px;overflow:hidden;
   display:flex;flex-direction:column}
@@ -143,6 +150,7 @@ var ZONE_ORDER = ["博物館", "老街", "瀑布"];
 var ZC = { "博物館":"z1", "老街":"z2", "瀑布":"z3" };
 
 var db, root, DATA = {}, filter = "overview", connErr = "";
+var zoneOpen = {};   /* 使用者手動展開或收起的紀錄 */
 
 document.getElementById("in").onclick = enter;
 document.getElementById("pw").onkeydown = function(e){ if(e.key === "Enter") enter(); };
@@ -268,14 +276,29 @@ function famBlock(fid){
   });
   if(!pick.length) return "";
 
-  /* 依博物館→老街→瀑布分組，每組補滿整列，讓同一列只有同一區 */
+  /* 依博物館→老街→瀑布分組，整區審完就預設收起 */
   var shots = "";
   ZONE_ORDER.forEach(function(z){
     var g = pick.filter(function(t){ return t.zone === z; });
     if(!g.length) return;
-    shots += g.map(function(t){ return shotCard(fid, tasks[t.id], t); }).join("");
-    var pad = (COLS - g.length % COLS) % COLS;
-    for(var i = 0; i < pad; i++) shots += '<div class="spacer" aria-hidden="true"></div>';
+
+    var np = g.filter(function(t){
+      return tasks[t.id] && tasks[t.id].status === "pending";
+    }).length;
+
+    var key = fid + "|" + z;
+    var open = (key in zoneOpen) ? zoneOpen[key] : (np > 0);
+    var cnt = np ? (np + " 張待審") : (g.length + " 張，已審完");
+
+    var cards = open
+      ? '<div class="grid">' + g.map(function(t){ return shotCard(fid, tasks[t.id], t); }).join("") + '</div>'
+      : "";
+
+    shots += '<div class="zgroup"><button class="zhead" data-zg="' + key + '" data-open="' + (open ? 1 : 0) + '">'
+      + '<span class="zone ' + (ZC[z] || "") + '">' + z + '</span>'
+      + '<span class="cnt">' + cnt + '</span>'
+      + '<span class="chev">' + (open ? "\u25be" : "\u25b8") + '</span>'
+      + '</button>' + cards + '</div>';
   });
 
   var pend = pendOf(f);
@@ -283,7 +306,7 @@ function famBlock(fid){
     + '<div><div class="fam-n">' + esc(f.name || "未命名") + '</div>'
     + '<div class="fam-m">' + (f.dept ? esc(f.dept) + '　' : '') + '已通過 ' + okOf(f) + ' / ' + TOTAL + '　待審 ' + pend + '　代號 ' + fid + '</div></div>'
     + (pend ? '<button class="btn ok" data-all="' + fid + '">這組全部通過</button>' : "")
-    + '</div><div class="grid">' + shots + '</div></div>';
+    + '</div>' + shots + '</div>';
 }
 
 function shotCard(fid, t, meta){
@@ -367,6 +390,13 @@ function bind(){
     if(prompt("確認請輸入「清除」兩個字") !== "清除") return;
     root.remove();
   };
+
+  each("[data-zg]", function(b){
+    b.onclick = function(){
+      zoneOpen[b.dataset.zg] = (b.dataset.open !== "1");
+      render();
+    };
+  });
 
   each("[data-big]", function(i){
     i.onclick = function(){
