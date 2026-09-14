@@ -257,41 +257,77 @@ function resize(file, max, q, cb){
 }
 
 /* ── 上傳佇列：拍完立刻入列，背景重試，不擋操作 ── */
+var UP_TIMEOUT = 45000;   /* 單次上傳逾時 */
+var UP_STUCK   = 60000;   /* 看門狗：超過就強制解鎖 */
+
 function enqueue(taskId, dataUrl){
+  /* 同一任務換照片：舊的留在佇列外，回應回來會被視為作廢 */
   queue = queue.filter(function(x){ return x.taskId !== taskId; });
-  queue.push({ taskId:taskId, data:dataUrl, tries:0 });
+  queue.push({ taskId:taskId, data:dataUrl, tries:0, err:"" });
   saveQueue(); render(); pump();
 }
 
-var pumping = false;
+var pumping = false, inflightSince = 0;
+
 function pump(){
-  if(pumping || !queue.length) return;
+  if(!queue.length) return;
+  if(pumping){
+    if(Date.now() - inflightSince > UP_STUCK) pumping = false;   /* 卡住就解鎖重來 */
+    else return;
+  }
   if(!UPLOAD_URL){ flushOffline(); return; }
   if(!navigator.onLine) return;
+
   pumping = true;
+  inflightSince = Date.now();
   var job = queue[0];
 
-  fetch(UPLOAD_URL, {
+  var ctl = (typeof AbortController !== "undefined") ? new AbortController() : null;
+  var killer = setTimeout(function(){ if(ctl) ctl.abort(); }, UP_TIMEOUT);
+
+  var opt = {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ fid: fid(), name: local.name, taskId: job.taskId, image: job.data })
-  })
+    body: JSON.stringify({ fid: fid(), name: local.name, dept: local.dept, taskId: job.taskId, image: job.data })
+  };
+  if(ctl) opt.signal = ctl.signal;
+
+  fetch(UPLOAD_URL, opt)
   .then(function(r){ return r.json(); })
   .then(function(res){
+    clearTimeout(killer);
     pumping = false;
+    var i = queue.indexOf(job);
+    if(i < 0){ pump(); return; }        /* 已被新照片取代，這次結果作廢 */
     if(res && res.ok){
-      queue.shift(); saveQueue();
+      queue.splice(i, 1); saveQueue();
       writeTask(job.taskId, { status:"pending", fileId:res.fileId, at:Date.now() });
       render(); pump();
-    }else{ retry(job); }
+    }else{
+      job.err = (res && res.error) ? String(res.error) : "伺服器沒有回傳成功";
+      retry(job);
+    }
   })
-  .catch(function(){ pumping = false; retry(job); });
+  .catch(function(e){
+    clearTimeout(killer);
+    pumping = false;
+    var msg = String((e && e.message) || e);
+    job.err = /abort/i.test(msg) ? "上傳逾時" : "連線失敗";
+    retry(job);
+  });
 }
 
 function retry(job){
   job.tries = (job.tries || 0) + 1;
   saveQueue(); render();
   setTimeout(pump, Math.min(30000, 3000 * job.tries));
+}
+
+function queueTrouble(){
+  for(var i = 0; i < queue.length; i++){
+    if((queue[i].tries || 0) >= 3) return queue[i];
+  }
+  return null;
 }
 
 /* 沒有上傳網址時的退路：狀態照走，照片只留在本機 */
@@ -347,6 +383,11 @@ function banner(){
 function netbar(){
   var n = queue.length;
   if(!n) return "";
+  var bad = queueTrouble();
+  if(bad){
+    return '<div class="banner">有 ' + n + ' 張照片送不出去（' + esc(bad.err || "連線失敗")
+      + '）。程式仍在背景重試，若一直不過，請確認網路，或找工作人員。</div>';
+  }
   return '<div class="netbar">有 ' + n + ' 張照片正在背景上傳，收訊恢復會自動送出，可以先去下一個任務。</div>';
 }
 
@@ -440,6 +481,15 @@ function tagOf(s){
   return '<span class="tag t-todo">未完成</span>';
 }
 
+function uploadMsg(id){
+  var j = null;
+  for(var i = 0; i < queue.length; i++){ if(queue[i].taskId === id){ j = queue[i]; break; } }
+  if(j && (j.tries || 0) >= 3){
+    return "送了 " + j.tries + " 次都沒成功（" + (j.err || "連線失敗") + "）。程式還在重試，也可以直接重拍一張。";
+  }
+  return "照片在背景上傳中，可以先去下一個任務，收訊恢復會自動送出。";
+}
+
 function pageTask(){
   var x = TASKS.filter(function(a){ return a.id === view.task; })[0];
   var z = ZONES.filter(function(a){ return a.id === x.zone; })[0];
@@ -447,7 +497,7 @@ function pageTask(){
 
   var msg = {
     todo:      "拍好之後會送出審核，工作人員確認就會計入進度。",
-    uploading: "照片在背景上傳中，可以先去下一個任務，收訊恢復會自動送出。",
+    uploading: uploadMsg(x.id),
     pending:   "已送出，工作人員審核中。通過時這頁會自動更新。",
     approved:  "已通過，這張卡收進圖鑑了。",
     rejected:  "這張沒通過，照著任務敘述再拍一次就好。"
@@ -455,7 +505,9 @@ function pageTask(){
 
   var btn = "";
   if(st === "uploading"){
-    btn = '<div class="bar"><i></i></div>';
+    btn = '<div class="bar"><i></i></div>'
+        + '<button class="btn ghost" data-shoot="cam">重拍一張</button>'
+        + '<button class="btn ghost" data-shoot="lib">改從相簿選</button>';
   }else if(st !== "approved"){
     var main = st === "rejected" ? "重新拍照" : st === "pending" ? "換一張照片" : "拍照";
     var cls  = st === "pending" ? "btn ghost" : "btn";
