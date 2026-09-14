@@ -47,6 +47,8 @@ tbody tr:hover{background:#14261D}
 .mini{font-size:12.5px;padding:5px 11px;border-radius:2px;border:1px solid var(--line);white-space:nowrap}
 .mini.go{background:var(--ok);border-color:var(--ok);color:#EAF5EF}
 .mini.undo{color:var(--dim)}
+.mini.del{color:var(--red2);border-color:#6B2118}
+.mini.del:hover{background:#4A1712}
 .locked{font-size:12.5px;color:#5C7566}
 .done{font-size:12.5px;color:var(--ok)}
 
@@ -235,12 +237,14 @@ function overview(){
       + '<td><div class="unit">' + esc(f.name || "未命名") + '</div><div class="code">' + k + '</div></td>'
       + '<td><div class="meter"><i><b style="width:' + pct + '%"></b></i><span>' + ok + ' / ' + TOTAL + '</span></div></td>'
       + '<td><span class="wait' + (pend ? "" : " none") + '">' + (pend ? pend + " 張待審" : "—") + '</span></td>'
-      + cells + '</tr>';
+      + cells
+      + '<td><button class="mini del" data-del="' + k + '">刪除</button></td></tr>';
   }).join("");
 
-  return '<div class="wrap"><table><thead><tr>'
+  return '<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="mini del" id="wipe">清除所有資料</button></div>'
+    + '<div class="wrap"><table><thead><tr>'
     + '<th>參加單位</th><th>進度</th><th>待審</th>'
-    + '<th>第一階段 ' + TIERS[0] + ' 張</th><th>第二階段 ' + TIERS[1] + ' 張</th>'
+    + '<th>第一階段 ' + TIERS[0] + ' 張</th><th>第二階段 ' + TIERS[1] + ' 張</th><th></th>'
     + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
     + '<p class="sub" style="margin-top:12px">依完成張數排序，快完成的在最上面。核銷後玩家手機會顯示「已領取」，按錯可以按取消還原。</p>';
 }
@@ -344,6 +348,25 @@ function bind(){
       root.child(fid + "/claimed/t" + n).set(null);
     };
   });
+
+  each("[data-del]", function(b){
+    b.onclick = function(){
+      if(!root) return;
+      var fid = b.dataset.del, nm = (DATA[fid] || {}).name || "未命名";
+      if(!confirm("刪除「" + nm + "」的整筆資料？照片仍留在雲端硬碟，但這一組的進度會完全消失，無法復原。")) return;
+      root.child(fid).remove();
+    };
+  });
+
+  var wipe = document.getElementById("wipe");
+  if(wipe) wipe.onclick = function(){
+    if(!root) return;
+    var n = Object.keys(DATA).length;
+    if(!n){ alert("目前沒有資料。"); return; }
+    if(!confirm("要清除全部 " + n + " 組資料嗎？這個動作無法復原。")) return;
+    if(prompt("確認請輸入「清除」兩個字") !== "清除") return;
+    root.remove();
+  };
 
   each("[data-big]", function(i){
     i.onclick = function(){
