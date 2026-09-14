@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>探索圖鑑｜審核後台</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0F1D16;--p:#172C22;--p2:#1F3A2C;--line:#2E5241;--tx:#EDE6D6;--dim:#9DAE9F;
+  --red:#B0362A;--red2:#D9553F;--gold:#C8A75C;--ok:#2E7D5B}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:"Noto Sans TC",system-ui,sans-serif;
+  font-size:15px;line-height:1.7;padding:0 18px 60px;max-width:1200px;margin:0 auto}
+button{font-family:inherit;font-size:inherit;color:inherit;background:none;border:none;cursor:pointer}
+h1{font-size:22px;font-weight:500;padding:24px 0 4px}
+.sub{color:var(--dim);font-size:13px;margin-bottom:18px}
+input{background:var(--p);border:1px solid var(--line);border-radius:3px;padding:12px;
+  color:var(--tx);font-size:16px;font-family:inherit;width:100%;max-width:300px}
+.btn{background:var(--red);color:#FFF1EC;padding:11px 18px;border-radius:3px;font-size:14px}
+.btn.ok{background:var(--ok)}
+.hide{display:none !important}
+
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.stat{background:var(--p);border:1px solid var(--line);border-radius:3px;padding:10px 16px;min-width:104px}
+.stat b{display:block;font-size:22px;font-weight:500;color:var(--gold)}
+.stat span{font-size:12px;color:var(--dim)}
+
+.tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+.tab{padding:8px 15px;border:1px solid var(--line);border-radius:3px;font-size:13.5px;color:var(--dim)}
+.tab.on{background:var(--p2);color:var(--tx);border-color:var(--gold)}
+
+.wrap{border:1px solid var(--line);border-radius:3px;overflow:auto;max-height:72vh}
+table{width:100%;border-collapse:collapse;font-size:14px}
+thead th{position:sticky;top:0;background:var(--p2);text-align:left;font-weight:500;
+  font-size:12.5px;color:var(--dim);padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap;z-index:1}
+tbody td{padding:11px 14px;border-bottom:1px solid #1A3226;vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#14261D}
+.unit{font-size:15px}
+.code{font-size:11.5px;color:#5C7566}
+.meter{display:flex;align-items:center;gap:9px;min-width:150px}
+.meter i{flex:1;height:6px;background:var(--p2);border-radius:3px;overflow:hidden;display:block}
+.meter i b{display:block;height:6px;background:var(--red);border-radius:3px}
+.meter span{font-size:13px;color:var(--gold);white-space:nowrap}
+.wait{font-size:13px;color:var(--gold)}
+.wait.none{color:#5C7566}
+.mini{font-size:12.5px;padding:5px 11px;border-radius:2px;border:1px solid var(--line);white-space:nowrap}
+.mini.go{background:var(--ok);border-color:var(--ok);color:#EAF5EF}
+.mini.undo{color:var(--dim)}
+.locked{font-size:12.5px;color:#5C7566}
+.done{font-size:12.5px;color:var(--ok)}
+
+.fam{background:var(--p);border:1px solid var(--line);border-radius:3px;padding:14px 16px;margin-bottom:14px}
+.fam-h{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.fam-n{font-size:17px;font-weight:500}
+.fam-m{font-size:12.5px;color:var(--dim)}
+
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:1000px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.grid{grid-template-columns:1fr}}
+.spacer{visibility:hidden}
+
+.shot{background:var(--p2);border:1px solid var(--line);border-radius:3px;overflow:hidden;
+  display:flex;flex-direction:column}
+.shot.blank{background:#152A20;border-style:dashed}
+.shot img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:#0B1410;cursor:zoom-in}
+.shot .no{width:100%;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;
+  color:var(--line);font-size:12px;background:#0B1410;text-align:center;padding:0 10px;line-height:1.6}
+.meta{flex:1;display:flex;flex-direction:column;gap:5px;padding:9px 11px 7px}
+.zone{align-self:flex-start;font-size:11.5px;font-weight:500;letter-spacing:.05em;
+  padding:2px 10px;border-radius:2px}
+.z1{background:#8C3D2E;color:#FAE3DC}
+.z2{background:#8A6B22;color:#F7ECCE}
+.z3{background:#245E6B;color:#D8EEF3}
+.txt{font-size:12.5px;line-height:1.5;color:var(--dim);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:38px}
+.state{min-height:20px}
+.acts{display:flex;gap:6px;padding:0 11px 11px}
+.acts button{flex:1;font-size:12.5px;padding:6px;border-radius:2px;border:1px solid var(--line)}
+.acts .y{background:var(--ok);color:#EAF5EF;border-color:var(--ok)}
+.acts .n{background:#4A1712;color:var(--red2);border-color:#6B2118}
+.badge{display:inline-block;font-size:11px;padding:1px 7px;border-radius:2px}
+.b-ok{background:var(--ok);color:#EAF5EF}
+.b-no{background:#4A1712;color:var(--red2)}
+.b-wait{border:1px solid var(--gold);color:var(--gold)}
+.b-none{border:1px solid var(--line);color:#5C7566}
+.empty{color:var(--dim);font-size:14px;padding:30px 0}
+
+.lb{position:fixed;inset:0;background:rgba(6,12,9,.94);display:flex;align-items:center;
+  justify-content:center;padding:20px;z-index:9}
+.lb img{max-width:100%;max-height:88vh;object-fit:contain}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <h1>探索圖鑑　審核後台</h1>
+  <p class="sub">請輸入密碼</p>
+  <input type="password" id="pw" autocomplete="off">
+  <p style="margin-top:12px"><button class="btn" id="in">進入</button></p>
+  <p class="sub hide" id="bad" style="color:#D9553F;margin-top:10px">密碼不對</p>
+</div>
+
+<div id="main" class="hide"></div>
+<div id="lb" class="lb hide"><img id="lbi" alt=""></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+/* ══ 設定：與 index.html 保持一致 ══ */
+var PASS = "kuya2026";
+var FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDl_NqANwk_lsfEL5kOyC1RJi29DLvGPU8",
+  authDomain: "kuya-candy-game.firebaseapp.com",
+  databaseURL: "https://kuya-candy-game-default-rtdb.firebaseio.com",
+  projectId: "kuya-candy-game",
+  storageBucket: "kuya-candy-game.firebasestorage.app",
+  messagingSenderId: "105923267148",
+  appId: "1:105923267148:web:1f0e0db9de8cc2876c42e9"
+};
+var DB_ROOT = "fieldguide_beone_1017";
+var TIERS = [8, 12];
+var TOTAL = 12;
+var COLS = 4;
+
+var TASKS = [
+  { id:"m1", zone:"博物館", text:"博物館外的裝置藝術" },
+  { id:"m2", zone:"博物館", text:"館內與山林生存有關的展品" },
+  { id:"m3", zone:"博物館", text:"館內泰雅織紋展示" },
+  { id:"m4", zone:"博物館", text:"通往老街的橋上，溪谷為背景" },
+  { id:"s1", zone:"老街",   text:"老街小吃，看得出在老街內" },
+  { id:"s2", zone:"老街",   text:"老街小塔" },
+  { id:"s3", zone:"老街",   text:"攬勝大橋上與景觀" },
+  { id:"s4", zone:"老街",   text:"老街台車站附近壁畫" },
+  { id:"f1", zone:"瀑布",   text:"瀑布台車站外，軌道或台車" },
+  { id:"f2", zone:"瀑布",   text:"勇士廣場大型人像" },
+  { id:"f3", zone:"瀑布",   text:"導覽 QR 介紹的景物" },
+  { id:"f4", zone:"瀑布",   text:"停車場裝置，瀑布入鏡" }
+];
+var ZONE_ORDER = ["博物館", "老街", "瀑布"];
+var ZC = { "博物館":"z1", "老街":"z2", "瀑布":"z3" };
+
+var db, root, DATA = {}, filter = "overview", connErr = "";
+
+document.getElementById("in").onclick = enter;
+document.getElementById("pw").onkeydown = function(e){ if(e.key === "Enter") enter(); };
+
+function enter(){
+  if(document.getElementById("pw").value !== PASS){
+    document.getElementById("bad").classList.remove("hide"); return;
+  }
+  document.getElementById("gate").classList.add("hide");
+  document.getElementById("main").classList.remove("hide");
+  render();
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+    root = db.ref(DB_ROOT + "/families");
+    root.on("value",
+      function(s){ DATA = s.val() || {}; connErr = ""; render(); },
+      function(err){ connErr = String((err && err.message) || err); render(); });
+  }catch(e){ connErr = String(e); render(); }
+}
+
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function thumb(id, w){ return "https://drive.google.com/thumbnail?id=" + id + "&sz=w" + w; }
+function okOf(f){ var t = f.tasks || {}; return Object.keys(t).filter(function(i){ return t[i].status === "approved"; }).length; }
+function pendOf(f){ var t = f.tasks || {}; return Object.keys(t).filter(function(i){ return t[i].status === "pending"; }).length; }
+
+function counts(){
+  var c = { fam:0, pending:0, approved:0, rejected:0, claim:0 };
+  Object.keys(DATA).forEach(function(k){
+    var f = DATA[k] || {}; c.fam++;
+    var t = f.tasks || {};
+    Object.keys(t).forEach(function(id){ if(c[t[id].status] !== undefined) c[t[id].status]++; });
+    var ok = okOf(f), cl = f.claimed || {};
+    TIERS.forEach(function(n){ if(ok >= n && !cl["t" + n]) c.claim++; });
+  });
+  return c;
+}
+
+function errBanner(){
+  if(!connErr) return "";
+  return '<div style="background:#4A1712;border:1px solid #B0362A;border-radius:3px;padding:12px 15px;margin-bottom:16px;font-size:13.5px;line-height:1.65">'
+    + '連不上資料庫：' + esc(connErr)
+    + '<br>若顯示 permission denied，請到 Firebase 控制台的規則頁，替 <b>fieldguide_beone_1017</b> 節點開啟讀寫。</div>';
+}
+
+function render(){
+  var c = counts();
+  var html = '<h1>探索圖鑑　審核後台</h1>'
+    + '<p class="sub">狀態即時同步，按下通過的同一秒玩家手機就會更新</p>'
+    + errBanner()
+    + '<div class="stats">'
+    +   '<div class="stat"><b>' + c.fam + '</b><span>參加單位</span></div>'
+    +   '<div class="stat"><b>' + c.pending + '</b><span>待審核</span></div>'
+    +   '<div class="stat"><b>' + c.approved + '</b><span>已通過</span></div>'
+    +   '<div class="stat"><b>' + c.rejected + '</b><span>已退回</span></div>'
+    +   '<div class="stat"><b>' + c.claim + '</b><span>待發獎</span></div>'
+    + '</div>'
+    + '<div class="tabs">' + tab("overview","總覽") + tab("pending","待審核")
+    + tab("all","全部照片") + tab("approved","已通過") + tab("rejected","已退回") + '</div>';
+
+  html += filter === "overview" ? overview() : reviewList();
+  document.getElementById("main").innerHTML = html;
+  bind();
+}
+
+function tab(k, label){
+  return '<button class="tab' + (filter === k ? " on" : "") + '" data-tab="' + k + '">' + label + '</button>';
+}
+
+/* ── 總覽：進度與獎品核銷 ── */
+function overview(){
+  var keys = Object.keys(DATA);
+  if(!keys.length) return '<p class="empty">還沒有人開始，等參加者掃碼進入就會出現。</p>';
+
+  keys.sort(function(a,b){
+    var d = okOf(DATA[b]) - okOf(DATA[a]);
+    return d !== 0 ? d : (DATA[a].createdAt || 0) - (DATA[b].createdAt || 0);
+  });
+
+  var rows = keys.map(function(k){
+    var f = DATA[k] || {}, ok = okOf(f), pend = pendOf(f), cl = f.claimed || {};
+    var pct = Math.round(ok / TOTAL * 100);
+
+    var cells = TIERS.map(function(n){
+      if(cl["t" + n]) return '<td><span class="done">已發放</span> '
+        + '<button class="mini undo" data-undo="' + k + '" data-tier="' + n + '">取消</button></td>';
+      if(ok >= n) return '<td><button class="mini go" data-claim="' + k + '" data-tier="' + n + '">核銷發獎</button></td>';
+      return '<td><span class="locked">差 ' + (n - ok) + ' 張</span></td>';
+    }).join("");
+
+    return '<tr>'
+      + '<td><div class="unit">' + esc(f.name || "未命名") + '</div><div class="code">' + k + '</div></td>'
+      + '<td><div class="meter"><i><b style="width:' + pct + '%"></b></i><span>' + ok + ' / ' + TOTAL + '</span></div></td>'
+      + '<td><span class="wait' + (pend ? "" : " none") + '">' + (pend ? pend + " 張待審" : "—") + '</span></td>'
+      + cells + '</tr>';
+  }).join("");
+
+  return '<div class="wrap"><table><thead><tr>'
+    + '<th>參加單位</th><th>進度</th><th>待審</th>'
+    + '<th>第一階段 ' + TIERS[0] + ' 張</th><th>第二階段 ' + TIERS[1] + ' 張</th>'
+    + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
+    + '<p class="sub" style="margin-top:12px">依完成張數排序，快完成的在最上面。核銷後玩家手機會顯示「已領取」，按錯可以按取消還原。</p>';
+}
+
+/* ── 審核清單 ── */
+function reviewList(){
+  var keys = Object.keys(DATA).sort(function(a,b){
+    return (DATA[b].createdAt || 0) - (DATA[a].createdAt || 0);
+  });
+  var blocks = keys.map(famBlock).filter(Boolean);
+  return blocks.length ? blocks.join("") : '<p class="empty">目前沒有符合條件的照片。</p>';
+}
+
+function famBlock(fid){
+  var f = DATA[fid] || {}, tasks = f.tasks || {};
+  var showAll = (filter === "all");
+
+  var pick = TASKS.filter(function(t){
+    var st = tasks[t.id] && tasks[t.id].status;
+    return showAll ? true : st === filter;
+  });
+  if(!pick.length) return "";
+
+  /* 依博物館→老街→瀑布分組，每組補滿整列，讓同一列只有同一區 */
+  var shots = "";
+  ZONE_ORDER.forEach(function(z){
+    var g = pick.filter(function(t){ return t.zone === z; });
+    if(!g.length) return;
+    shots += g.map(function(t){ return shotCard(fid, tasks[t.id], t); }).join("");
+    var pad = (COLS - g.length % COLS) % COLS;
+    for(var i = 0; i < pad; i++) shots += '<div class="spacer" aria-hidden="true"></div>';
+  });
+
+  var pend = pendOf(f);
+  return '<div class="fam"><div class="fam-h">'
+    + '<div><div class="fam-n">' + esc(f.name || "未命名") + '</div>'
+    + '<div class="fam-m">已通過 ' + okOf(f) + ' / ' + TOTAL + '　待審 ' + pend + '　代號 ' + fid + '</div></div>'
+    + (pend ? '<button class="btn ok" data-all="' + fid + '">這組全部通過</button>' : "")
+    + '</div><div class="grid">' + shots + '</div></div>';
+}
+
+function shotCard(fid, t, meta){
+  var zc = ZC[meta.zone] || "";
+  var head = '<div class="meta">'
+    + '<div class="zone ' + zc + '">' + meta.zone + '</div>'
+    + '<div class="txt" title="' + esc(meta.text) + '">' + esc(meta.text) + '</div>';
+
+  if(!t || !t.status){
+    return '<div class="shot blank"><div class="no">尚未上傳</div>'
+      + head + '<div class="state"><span class="badge b-none">未完成</span></div></div></div>';
+  }
+
+  var img = t.fileId
+    ? '<img src="' + thumb(t.fileId, 600) + '" alt="" data-big="' + t.fileId + '" loading="lazy">'
+    : '<div class="no">沒有照片檔<br>（離線模式上傳）</div>';
+
+  var badge = t.status === "approved" ? '<span class="badge b-ok">已通過</span>'
+            : t.status === "rejected" ? '<span class="badge b-no">已退回</span>'
+            : '<span class="badge b-wait">待審核</span>';
+
+  return '<div class="shot">' + img + head
+    + '<div class="state">' + badge + '</div></div>'
+    + '<div class="acts">'
+    +   '<button class="y" data-a="approved" data-f="' + fid + '" data-t="' + meta.id + '">通過</button>'
+    +   '<button class="n" data-a="rejected" data-f="' + fid + '" data-t="' + meta.id + '">退回</button>'
+    + '</div></div>';
+}
+
+/* ── 綁定 ── */
+function bind(){
+  each("[data-tab]", function(b){ b.onclick = function(){ filter = b.dataset.tab; render(); }; });
+
+  each("[data-a]", function(b){
+    b.onclick = function(){ if(root) root.child(b.dataset.f + "/tasks/" + b.dataset.t + "/status").set(b.dataset.a); };
+  });
+
+  each("[data-all]", function(b){
+    b.onclick = function(){
+      if(!root) return;
+      var fid = b.dataset.all, tasks = (DATA[fid] || {}).tasks || {}, up = {};
+      Object.keys(tasks).forEach(function(id){ if(tasks[id].status === "pending") up[id + "/status"] = "approved"; });
+      if(Object.keys(up).length) root.child(fid + "/tasks").update(up);
+    };
+  });
+
+  each("[data-claim]", function(b){
+    b.onclick = function(){
+      if(!root) return;
+      var fid = b.dataset.claim, n = b.dataset.tier;
+      var nm = (DATA[fid] || {}).name || "未命名";
+      if(!confirm("確定把第 " + n + " 張階段的獎品發給「" + nm + "」？")) return;
+      root.child(fid + "/claimed/t" + n).set(true);
+    };
+  });
+
+  each("[data-undo]", function(b){
+    b.onclick = function(){
+      if(!root) return;
+      var fid = b.dataset.undo, n = b.dataset.tier;
+      if(!confirm("取消這筆發放紀錄？玩家端會變回可領取。")) return;
+      root.child(fid + "/claimed/t" + n).set(null);
+    };
+  });
+
+  each("[data-big]", function(i){
+    i.onclick = function(){
+      document.getElementById("lbi").src = thumb(i.dataset.big, 1600);
+      document.getElementById("lb").classList.remove("hide");
+    };
+  });
+}
+
+document.getElementById("lb").onclick = function(){ this.classList.add("hide"); };
+function each(sel, fn){ Array.prototype.forEach.call(document.querySelectorAll(sel), fn); }
+</script>
+</body>
+</html>

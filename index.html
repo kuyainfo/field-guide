@@ -1,294 +1,478 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>探索圖鑑</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0F1D16">
+<title>百濟探索圖鑑｜烏來</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans TC', sans-serif; background: #f5f4f0; min-height: 100vh; }
-.app { max-width: 480px; margin: 0 auto; padding: 0 0 3rem; }
-.header { text-align: center; padding: 1.5rem 1rem 0.75rem; }
-.header h1 { font-size: 22px; font-weight: 600; color: #1a1a1a; letter-spacing: 0.05em; }
-.tabs { display: flex; gap: 6px; padding: 0 1rem 0.75rem; }
-.tab { flex: 1; padding: 8px 0; font-size: 13px; font-weight: 500; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #888; cursor: pointer; text-align: center; transition: all 0.15s; }
-.tab.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
-.region-info { text-align: center; font-size: 13px; color: #888; margin-bottom: 0.75rem; padding: 0 1rem; }
-.region-info strong { color: #1a1a1a; }
-.section-title { font-size: 13px; font-weight: 500; color: #aaa; text-align: center; margin-bottom: 0.75rem; letter-spacing: 0.08em; }
-.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 1rem; }
-.card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; overflow: hidden; cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; position: relative; }
-.card:active { transform: scale(0.97); }
-.card.collected { border-color: #1D9E75; }
-.card-top { padding: 5px 7px 2px; display: flex; justify-content: space-between; align-items: center; }
-.cat-badge { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 10px; }
-.cat-plant { background: #e8f5e2; color: #2d7a1f; }
-.cat-landscape { background: #e3eef9; color: #1a5fa0; }
-.cat-culture { background: #fef3e2; color: #a06010; }
-.card-img { height: 64px; display: flex; align-items: center; justify-content: center; font-size: 34px; background: #f9f8f5; position: relative; }
-.card.uncollected .card-img { filter: grayscale(1) opacity(0.35); }
-.collected-badge { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); background: #1D9E75; color: #fff; font-size: 9px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; z-index: 2; }
-.card-body { padding: 5px 7px 8px; }
-.card-name { font-size: 12px; font-weight: 600; color: #1a1a1a; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.card.uncollected .card-name { color: #bbb; }
-.card-desc { font-size: 10px; color: #999; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.card.uncollected .card-desc { color: #ccc; }
-.card-num { font-size: 10px; color: #ccc; margin-top: 3px; }
+:root{
+  --moss:#0F1D16; --moss-2:#172C22; --moss-3:#1F3A2C; --line:#2E5241;
+  --linen:#EDE6D6; --linen-dim:#9DAE9F;
+  --thread:#B0362A; --thread-lit:#D9553F; --grain:#C8A75C;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--moss);color:var(--linen)}
+body{font-family:"Noto Sans TC",system-ui,sans-serif;font-size:15px;line-height:1.75;
+  padding:0 20px calc(40px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;
+  -webkit-font-smoothing:antialiased}
+h1,h2{font-family:"Noto Serif TC",serif;font-weight:700;letter-spacing:.02em}
+button{font-family:inherit;font-size:inherit;color:inherit;background:none;border:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--grain);outline-offset:3px}
+.hide{display:none !important}
 
-/* Modal */
-.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: flex-end; justify-content: center; }
-.modal-bg.open { display: flex; }
-.modal { background: #fff; border-radius: 20px 20px 0 0; padding: 1.25rem 1.25rem 2.5rem; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
-.modal-handle { width: 36px; height: 4px; background: #e0e0e0; border-radius: 2px; margin: 0 auto 1.25rem; }
-.modal-cat { margin-bottom: 6px; }
-.modal-name { font-size: 20px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; }
-.modal-desc { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 1.25rem; }
-.modal-photo { width: 100%; height: 180px; border-radius: 12px; border: 2px dashed #ddd; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; margin-bottom: 1rem; cursor: pointer; font-size: 14px; color: #aaa; background: #f9f8f5; overflow: hidden; }
-.modal-photo img { width: 100%; height: 100%; object-fit: cover; }
-.btn-row { display: flex; gap: 8px; }
-.btn { flex: 1; padding: 13px 0; border-radius: 10px; font-size: 15px; font-weight: 500; border: 1px solid #ddd; background: #fff; color: #333; cursor: pointer; text-align: center; transition: background 0.1s; }
-.btn:active { background: #f5f5f5; }
-.btn-primary { background: #1D9E75; color: #fff; border-color: #1D9E75; }
-.btn-primary:disabled { background: #e0e0e0; color: #aaa; border-color: #e0e0e0; cursor: not-allowed; }
-.btn-primary:not(:disabled):active { background: #178a65; }
-.ai-status { display: none; flex-direction: column; align-items: center; gap: 10px; padding: 1.25rem 0 0.75rem; text-align: center; }
-.ai-status.show { display: flex; }
-.spinner { width: 32px; height: 32px; border: 3px solid #e0e0e0; border-top-color: #1D9E75; border-radius: 50%; animation: spin 0.8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.ai-label { font-size: 13px; color: #888; }
-.result-box { display: none; border-radius: 10px; padding: 12px 14px; margin-bottom: 1rem; }
-.result-box.show { display: block; }
-.result-pass { background: #e6f7f1; }
-.result-pass p { color: #0d6644; font-size: 14px; line-height: 1.5; }
-.result-fail { background: #fdecea; }
-.result-fail p { color: #8b1a1a; font-size: 14px; line-height: 1.5; }
-.collected-photo-preview { width: 100%; height: 150px; border-radius: 12px; object-fit: cover; margin-bottom: 0.75rem; border: 1px solid #e8e8e8; }
-.collected-info { font-size: 12px; color: #aaa; margin-bottom: 1rem; }
-.camera-icon { font-size: 32px; margin-bottom: 4px; }
-input[type=file] { display: none; }
+.weave{height:14px;width:100%;
+  background-image:linear-gradient(135deg,var(--line) 25%,transparent 25%),
+    linear-gradient(225deg,var(--line) 25%,transparent 25%),
+    linear-gradient(45deg,var(--line) 25%,transparent 25%),
+    linear-gradient(315deg,var(--line) 25%,transparent 25%);
+  background-size:14px 14px;opacity:.55}
+
+.topbar{display:flex;align-items:center;gap:10px;padding:22px 0 14px;min-height:64px}
+.back{display:flex;align-items:center;gap:5px;color:var(--linen-dim);font-size:13.5px;padding:6px 2px}
+.back svg{width:14px;height:14px}
+.eyebrow{font-size:12px;color:var(--grain);letter-spacing:.18em}
+.title{font-size:25px;line-height:1.3;margin-top:2px}
+.sub{color:var(--linen-dim);font-size:13.5px;margin-top:4px}
+
+.tally{display:flex;gap:5px;margin:20px 0 8px}
+.tally i{flex:1;height:18px;background:var(--moss-3);
+  clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);transition:background .35s}
+.tally i.on{background:var(--thread)}
+.tally i.tier{outline:1px solid var(--grain);outline-offset:2px}
+.tally-legend{display:flex;justify-content:space-between;font-size:11.5px;color:var(--linen-dim)}
+
+.card{display:block;width:100%;text-align:left;background:var(--moss-2);
+  border:1px solid var(--line);border-radius:3px;padding:14px 16px;margin-bottom:10px}
+.card:active{background:var(--moss-3)}
+.card-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.card-name{font-size:16.5px;font-family:"Noto Serif TC",serif;font-weight:500}
+.card-sub{font-size:12.5px;color:var(--linen-dim);margin-top:1px}
+.count{font-size:13px;color:var(--grain);white-space:nowrap}
+.count.zero{color:var(--linen-dim)}
+
+.task{display:flex;gap:13px;align-items:flex-start;width:100%;text-align:left;
+  padding:14px 4px;border-bottom:1px solid var(--moss-3)}
+.task:last-of-type{border-bottom:none}
+.thumb{width:52px;height:52px;flex:none;border-radius:2px;background:var(--moss-2);
+  border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
+  color:var(--line);overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb svg{width:22px;height:22px}
+.task-text{font-size:14.5px;line-height:1.6}
+.tag{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:2px;margin-top:5px;line-height:1.7}
+.t-todo{color:var(--linen-dim);border:1px solid var(--line)}
+.t-pending{color:var(--grain);border:1px solid var(--grain)}
+.t-approved{background:var(--thread);color:#FFF1EC}
+.t-rejected{background:#4A1712;color:var(--thread-lit)}
+
+.prize{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--moss-3)}
+.prize:last-child{border-bottom:none}
+.prize b{font-family:"Noto Serif TC",serif;font-size:19px;color:var(--grain);width:38px;flex:none}
+.prize span{font-size:14.5px}
+.prize em{font-style:normal;font-size:12px;color:var(--linen-dim);display:block}
+.prize.locked{opacity:.42}
+
+.btn{display:block;width:100%;text-align:center;background:var(--thread);color:#FFF1EC;
+  padding:15px;border-radius:3px;font-size:16px;font-weight:500;margin-top:18px}
+.btn:active{background:var(--thread-lit)}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--linen-dim);font-size:14px;padding:12px}
+input[type=text]{width:100%;background:var(--moss-2);border:1px solid var(--line);
+  border-radius:3px;padding:14px;color:var(--linen);font-size:16px;font-family:inherit}
+input[type=text]::placeholder{color:#5C7566}
+.err{color:var(--thread-lit);font-size:13px;margin-top:8px}
+.note{font-size:12.5px;color:var(--linen-dim);margin-top:10px}
+.foot{margin-top:34px;padding-top:16px;border-top:1px solid var(--moss-3);
+  font-size:12px;color:#5C7566;display:flex;justify-content:space-between;align-items:center;gap:10px}
+
+.hero{width:100%;aspect-ratio:4/3;background:var(--moss-2);border:1px solid var(--line);
+  border-radius:3px;display:flex;align-items:center;justify-content:center;
+  color:var(--line);overflow:hidden;margin-bottom:18px}
+.hero img{width:100%;height:100%;object-fit:cover}
+.hero svg{width:44px;height:44px}
+
+.banner{background:#4A1712;border:1px solid var(--thread);border-radius:3px;
+  padding:13px 15px;margin-top:18px;font-size:13.5px;line-height:1.65}
+.netbar{background:var(--moss-2);border:1px solid var(--line);border-radius:3px;
+  padding:10px 14px;margin-top:16px;font-size:12.5px;color:var(--grain)}
+
+.bar{height:2px;background:var(--moss-3);margin-top:16px;overflow:hidden}
+.bar i{display:block;height:2px;width:38%;background:var(--grain);animation:sl 1.1s infinite ease-in-out}
+@keyframes sl{0%{transform:translateX(-100%)}100%{transform:translateX(300%)}}
+@media (prefers-reduced-motion:reduce){.bar i{animation:none;width:100%}}
 </style>
 </head>
 <body>
 
-<div class="app">
-  <div class="header"><h1>探索圖鑑</h1></div>
-  <div class="tabs">
-    <div class="tab active" onclick="switchRegion(0)">區域一</div>
-    <div class="tab" onclick="switchRegion(1)">區域二</div>
-    <div class="tab" onclick="switchRegion(2)">區域三</div>
-  </div>
-  <div class="region-info" id="region-info"></div>
-  <div class="section-title">圖鑑蒐集卡冊</div>
-  <div class="grid" id="grid"></div>
-</div>
+<div id="app"></div>
+<input type="file" id="cam" accept="image/*" capture="environment" class="hide">
 
-<div class="modal-bg" id="modal-bg" onclick="closeModalBg(event)">
-  <div class="modal" id="modal">
-    <div class="modal-handle"></div>
-    <div id="modal-content"></div>
-  </div>
-</div>
-
-<input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleFile(event)">
-
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script>
-const REGIONS = [
-  { name: '山林初探', desc: '海拔300-800m的低山帶' },
-  { name: '清流與河谷的交會', desc: '沿溪谷地形探索' },
-  { name: '聚落與文化地景', desc: '傳統聚落與人文遺址' }
+/* ══════════════ 設定：只有這一段需要改 ══════════════ */
+
+/* Apps Script 部署後的網址，格式 https://script.google.com/macros/s/AKfy.../exec
+   還沒部署就留空字串，程式會退回離線模式（照片只存本機、不上傳）。 */
+var UPLOAD_URL = "https://script.google.com/macros/s/AKfycbwdlNTNsi6Vv4Yn3oofGdJJa-h8RNk_zY2Rvquy91pztkYeyZuZabHiQ0gbB5IISTAziQ/exec";
+
+var FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDl_NqANwk_lsfEL5kOyC1RJi29DLvGPU8",
+  authDomain: "kuya-candy-game.firebaseapp.com",
+  databaseURL: "https://kuya-candy-game-default-rtdb.firebaseio.com",
+  projectId: "kuya-candy-game",
+  storageBucket: "kuya-candy-game.firebasestorage.app",
+  messagingSenderId: "105923267148",
+  appId: "1:105923267148:web:1f0e0db9de8cc2876c42e9"
+};
+
+var DB_ROOT = "fieldguide_beone_1017";
+var EVENT_INFO = "16:30 瀑布 3 號廣場集合頒獎";
+var VERSION = "v1.1";
+
+var ZONES = [
+  { id:"museum", name:"泰雅民族博物館", sub:"深化文化脈絡" },
+  { id:"street", name:"烏來老街",       sub:"品味原鄉風味" },
+  { id:"fall",   name:"烏來瀑布",       sub:"解鎖生態遺產" }
 ];
 
-const ITEMS = [
-  [
-    { id:'r0c0', cat:'plant', name:'姑婆芋', emoji:'🌿', desc:'葉片寬大如芋，常見於溪邊潮濕處，葉柄有白色汁液', num:1 },
-    { id:'r0c1', cat:'landscape', name:'巨岩地形', emoji:'🪨', desc:'經長年風化形成的巨石群，苔蘚附生其上', num:2 },
-    { id:'r0c2', cat:'culture', name:'古道石階', emoji:'🪜', desc:'先民鑿山開路留下的石砌階梯，青苔覆蓋', num:3 },
-    { id:'r0c3', cat:'plant', name:'台灣山蘇', emoji:'🌱', desc:'附生於樹幹的鳥巢蕨，葉片光滑鮮綠', num:4 },
-    { id:'r0c4', cat:'landscape', name:'瀑布水簾', emoji:'💧', desc:'山壁間傾瀉而下的細流，形成薄如紗簾的水幕', num:5 },
-    { id:'r0c5', cat:'culture', name:'燒炭窯遺址', emoji:'🏚️', desc:'早期伐木時期留下的炭窯，石砌結構仍在', num:6 },
-    { id:'r0c6', cat:'plant', name:'筆筒樹', emoji:'🌳', desc:'高大樹蕨，樹幹留有葉痕形成獨特紋路', num:7 },
-    { id:'r0c7', cat:'landscape', name:'霧中林道', emoji:'🌫️', desc:'清晨林間瀰漫山嵐，光線穿透形成光柱', num:8 },
-    { id:'r0c8', cat:'culture', name:'山神廟', emoji:'⛩️', desc:'登山口附近小祠，是山林信仰的縮影', num:9 },
-  ],
-  [
-    { id:'r1c0', cat:'plant', name:'過溝菜蕨', emoji:'🌿', desc:'嫩芽頂端捲曲成捲曲狀，可食用', num:10 },
-    { id:'r1c1', cat:'landscape', name:'豆腐岩', emoji:'🪨', desc:'方格狀裂隙的豆腐岩與圓形壺穴', num:11 },
-    { id:'r1c2', cat:'culture', name:'擺渡體驗', emoji:'⛵', desc:'乘坐竹筏橫越溪流的傳統渡河方式', num:12 },
-    { id:'r1c3', cat:'plant', name:'野薑花', emoji:'🌸', desc:'形似蝴蝶的白色花朵，花香清幽', num:13 },
-    { id:'r1c4', cat:'landscape', name:'雙溪匯流', emoji:'🏞️', desc:'水色交融與寬闊河灘', num:14 },
-    { id:'r1c5', cat:'culture', name:'溪邊野炊', emoji:'🔥', desc:'在溪畔用石頭搭灶的野外炊事體驗', num:15 },
-    { id:'r1c6', cat:'plant', name:'台灣石蒜', emoji:'🌺', desc:'秋季開放的紅色花朵，葉片細長', num:16 },
-    { id:'r1c7', cat:'landscape', name:'老街河陌', emoji:'🏘️', desc:'依河陌地形而建的傳統聚落', num:17 },
-    { id:'r1c8', cat:'plant', name:'水同木', emoji:'🌳', desc:'成熟時粉紅色的幹生果', num:18 },
-  ],
-  [
-    { id:'r2c0', cat:'culture', name:'藺草編織', emoji:'🧺', desc:'傳統手工編織，以藺草製作帽席', num:19 },
-    { id:'r2c1', cat:'landscape', name:'梯田景觀', emoji:'🌾', desc:'順山勢開鑿的層層梯田，倒映天光', num:20 },
-    { id:'r2c2', cat:'plant', name:'龍眼老樹', emoji:'🌳', desc:'百年以上龍眼樹，枝幹蒼勁', num:21 },
-    { id:'r2c3', cat:'culture', name:'傳統製茶', emoji:'🍵', desc:'親手揉捻茶葉，感受製茶工序', num:22 },
-    { id:'r2c4', cat:'landscape', name:'石板屋聚落', emoji:'🏠', desc:'原住民傳統石板屋建築群', num:23 },
-    { id:'r2c5', cat:'plant', name:'台灣欒樹', emoji:'🍂', desc:'秋季轉紅的黃金風鈴木近親', num:24 },
-    { id:'r2c6', cat:'culture', name:'竹編工藝', emoji:'🎋', desc:'傳統竹編器物製作體驗', num:25 },
-    { id:'r2c7', cat:'landscape', name:'廢棄鐵道', emoji:'🛤️', desc:'蔓草覆蓋的舊糖鐵軌道遺跡', num:26 },
-    { id:'r2c8', cat:'plant', name:'咸豐草', emoji:'🌼', desc:'路邊常見的白色小野花，果實會沾黏', num:27 },
-  ]
+var TASKS = [
+  { id:"m1", zone:"museum", text:"與博物館外的裝置藝術合照" },
+  { id:"m2", zone:"museum", text:"在館內找一件和山林生存有關的展品，與它合照" },
+  { id:"m3", zone:"museum", text:"在館內找一件泰雅織紋的展示，拍下你們最喜歡的一組圖案" },
+  { id:"m4", zone:"museum", text:"走上通往老街的那座橋，以溪谷為背景合照" },
+  { id:"s1", zone:"street", text:"在老街買一樣小吃，拿著它合照，畫面要看得出在老街內" },
+  { id:"s2", zone:"street", text:"找到老街的小塔，與它合照" },
+  { id:"s3", zone:"street", text:"走上攬勝大橋，在橋上與看見的景觀合照" },
+  { id:"s4", zone:"street", text:"找到老街台車站附近的壁畫，與它合照" },
+  { id:"f1", zone:"fall",   text:"在瀑布台車站外，與軌道或台車合照" },
+  { id:"f2", zone:"fall",   text:"找到勇士廣場的大型人像，與它合照" },
+  { id:"f3", zone:"fall",   text:"掃描勇士廣場的導覽 QR，拍下它介紹的那個景物" },
+  { id:"f4", zone:"fall",   text:"在勇士廣場對面停車場的裝置前拍照，瀑布要入鏡" }
 ];
 
-const CAT_LABELS = { plant:'植物', landscape:'景觀', culture:'文化' };
-const CAT_CSS = { plant:'cat-plant', landscape:'cat-landscape', culture:'cat-culture' };
+/* 兩階段獎勵。name 先留空，確定品項後填進去即可。 */
+var PRIZES = [
+  { at:8,  name:"" },
+  { at:12, name:"" }
+];
 
-let currentRegion = 0;
-let activeItem = null;
-let pendingPhoto = null;
-let collected = {};
+/* ══════════════ 以下不需要修改 ══════════════ */
 
-function load() {
-  try { collected = JSON.parse(localStorage.getItem('fieldguide_collected') || '{}'); } catch(e) { collected = {}; }
-}
-function save() {
-  try { localStorage.setItem('fieldguide_collected', JSON.stringify(collected)); } catch(e) {}
-}
+var LS_FID = "fg_fid", LS_LOCAL = "fg_local_v2", LS_QUEUE = "fg_queue_v2";
+var db = null, fref = null;
 
-function countCollected(r) {
-  return ITEMS[r].filter(i => collected[i.id]).length;
-}
+var remote = { name:"", tasks:{}, claimed:{} };   /* Firebase 上的真實狀態 */
+var local  = loadLocal();                          /* 本機縮圖與樂觀狀態 */
+var queue  = loadQueue();                          /* 待上傳佇列 */
+var online = navigator.onLine;
 
-function switchRegion(r) {
-  currentRegion = r;
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===r));
-  render();
-}
+function loadLocal(){ try{ return JSON.parse(localStorage.getItem(LS_LOCAL)) || { name:"", thumbs:{} }; }catch(e){ return { name:"", thumbs:{} }; } }
+function saveLocal(){ try{ localStorage.setItem(LS_LOCAL, JSON.stringify(local)); }catch(e){} }
+function loadQueue(){ try{ return JSON.parse(localStorage.getItem(LS_QUEUE)) || []; }catch(e){ return []; } }
+function saveQueue(){ try{ localStorage.setItem(LS_QUEUE, JSON.stringify(queue)); }catch(e){} }
 
-function render() {
-  const r = currentRegion;
-  const total = ITEMS[r].length;
-  const done = countCollected(r);
-  document.getElementById('region-info').innerHTML =
-    `<strong>${REGIONS[r].name}</strong>　探索進度：${done} / ${total} 已蒐集`;
-
-  const grid = document.getElementById('grid');
-  grid.innerHTML = '';
-  ITEMS[r].forEach(item => {
-    const col = collected[item.id];
-    const div = document.createElement('div');
-    div.className = 'card ' + (col ? 'collected' : 'uncollected');
-    div.onclick = () => openModal(item);
-    const imgContent = col && col.photo
-      ? `<img src="${col.photo}" style="width:100%;height:100%;object-fit:cover">`
-      : `<span>${item.emoji}</span>`;
-    div.innerHTML = `
-      <div class="card-top">
-        <span class="cat-badge ${CAT_CSS[item.cat]}">${CAT_LABELS[item.cat]}</span>
-      </div>
-      <div class="card-img">
-        ${imgContent}
-        ${col ? '<span class="collected-badge">已蒐集</span>' : ''}
-      </div>
-      <div class="card-body">
-        <div class="card-name">${col ? item.name : '???'}</div>
-        <div class="card-desc">${col ? item.desc : '拍照解鎖'}</div>
-        <div class="card-num">#${String(item.num).padStart(3,'0')}</div>
-      </div>`;
-    grid.appendChild(div);
-  });
-}
-
-function openModal(item) {
-  activeItem = item;
-  pendingPhoto = null;
-  const col = collected[item.id];
-  const modal = document.getElementById('modal-content');
-
-  if (col) {
-    modal.innerHTML = `
-      <div class="modal-cat"><span class="cat-badge ${CAT_CSS[item.cat]}">${CAT_LABELS[item.cat]}</span></div>
-      <div class="modal-name">${item.name}</div>
-      <div class="modal-desc">${item.desc}</div>
-      ${col.photo ? `<img class="collected-photo-preview" src="${col.photo}">` : ''}
-      <div class="collected-info">蒐集於 ${col.date}</div>
-      <button class="btn" onclick="closeModal()">關閉</button>`;
-  } else {
-    modal.innerHTML = `
-      <div class="modal-cat"><span class="cat-badge ${CAT_CSS[item.cat]}">${CAT_LABELS[item.cat]}</span></div>
-      <div class="modal-name">${item.name}</div>
-      <div class="modal-desc">${item.desc}</div>
-      <div class="modal-photo" id="photo-zone" onclick="triggerUpload()">
-        <div class="camera-icon">📷</div>
-        <span>點此拍照或上傳照片</span>
-      </div>
-      <div class="ai-status" id="ai-status">
-        <div class="spinner"></div>
-        <div class="ai-label">AI 辨識中...</div>
-      </div>
-      <div class="result-box" id="result-box"></div>
-      <div class="btn-row">
-        <button class="btn" onclick="closeModal()">取消</button>
-        <button class="btn btn-primary" id="submit-btn" disabled onclick="submitPhoto()">送出審核</button>
-      </div>`;
+function fid(){
+  var v = localStorage.getItem(LS_FID);
+  if(!v){
+    v = "";
+    var c = "abcdefghjkmnpqrstuvwxyz23456789";
+    for(var i=0;i<10;i++) v += c.charAt(Math.floor(Math.random()*c.length));
+    localStorage.setItem(LS_FID, v);
   }
-
-  document.getElementById('modal-bg').classList.add('open');
+  return v;
 }
 
-function triggerUpload() {
-  document.getElementById('file-input').click();
+/* ── Firebase ── */
+function connect(){
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+    fref = db.ref(DB_ROOT + "/families/" + fid());
+    fref.on("value", function(snap){
+      var v = snap.val() || {};
+      remote.name    = v.name || "";
+      remote.tasks   = v.tasks || {};
+      remote.claimed = v.claimed || {};
+      if(remote.name && !local.name){ local.name = remote.name; saveLocal(); }
+      render();
+    });
+  }catch(e){ db = null; }
 }
 
-function handleFile(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    pendingPhoto = ev.target.result;
-    const zone = document.getElementById('photo-zone');
-    zone.innerHTML = `<img src="${pendingPhoto}" style="width:100%;height:100%;object-fit:cover">`;
-    document.getElementById('submit-btn').disabled = false;
-    document.getElementById('result-box').className = 'result-box';
-    document.getElementById('result-box').innerHTML = '';
+function statusOf(id){
+  var q = queue.filter(function(x){ return x.taskId === id; })[0];
+  if(q) return "uploading";
+  var r = remote.tasks[id];
+  return r && r.status ? r.status : "todo";
+}
+function approvedCount(){ return TASKS.filter(function(x){ return statusOf(x.id) === "approved"; }).length; }
+function zoneCount(z){ return TASKS.filter(function(x){ return x.zone === z && statusOf(x.id) === "approved"; }).length; }
+
+/* ── 導覽 ── */
+var view = { page:"home", zone:null, task:null };
+function go(p,a){ view.page=p; view.zone=(a&&a.zone)||null; view.task=(a&&a.task)||null; window.scrollTo(0,0); render(); }
+
+/* ── 工具 ── */
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+var ICON_CAM  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8.5h3.2l1.3-2h8l1.3 2H20v11H3z"/><circle cx="11.5" cy="13.5" r="3.4"/></svg>';
+var ICON_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg>';
+
+function inAppBrowser(){
+  var u = navigator.userAgent || "";
+  return /Line\//i.test(u) || /FBAN|FBAV|Instagram/i.test(u) || /MicroMessenger/i.test(u);
+}
+
+/* 縮圖：給本機顯示用，長邊 320、品質 .6 */
+/* 上傳圖：長邊 1000、品質 .7 */
+function resize(file, max, q, cb){
+  var img = new Image(), url = URL.createObjectURL(file);
+  img.onload = function(){
+    var w = img.width, h = img.height;
+    if(w > h && w > max){ h = Math.round(h*max/w); w = max; }
+    else if(h >= w && h > max){ w = Math.round(w*max/h); h = max; }
+    var c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    c.getContext("2d").drawImage(img, 0, 0, w, h);
+    URL.revokeObjectURL(url);
+    cb(c.toDataURL("image/jpeg", q));
   };
-  reader.readAsDataURL(file);
-  e.target.value = '';
+  img.onerror = function(){ URL.revokeObjectURL(url); cb(null); };
+  img.src = url;
 }
 
-function submitPhoto() {
-  const aiStatus = document.getElementById('ai-status');
-  const resultBox = document.getElementById('result-box');
-  const submitBtn = document.getElementById('submit-btn');
-  submitBtn.disabled = true;
-  aiStatus.classList.add('show');
-  resultBox.className = 'result-box';
-
-  setTimeout(() => {
-    aiStatus.classList.remove('show');
-    const pass = Math.random() > 0.15;
-    if (pass) {
-      resultBox.className = 'result-box result-pass show';
-      resultBox.innerHTML = `<p>✓ AI 辨識通過！照片中偵測到符合「${activeItem.name}」條件的內容，已加入圖鑑。</p>`;
-      const now = new Date();
-      const date = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
-      collected[activeItem.id] = { date, photo: pendingPhoto };
-      save();
-      setTimeout(() => { closeModal(); render(); }, 1800);
-    } else {
-      resultBox.className = 'result-box result-fail show';
-      resultBox.innerHTML = `<p>✗ 未能辨識出「${activeItem.name}」，請嘗試拍攝更清晰的照片或調整角度。</p>`;
-      submitBtn.disabled = false;
-    }
-  }, 2000);
+/* ── 上傳佇列：拍完立刻入列，背景重試，不擋操作 ── */
+function enqueue(taskId, dataUrl){
+  queue = queue.filter(function(x){ return x.taskId !== taskId; });
+  queue.push({ taskId:taskId, data:dataUrl, tries:0 });
+  saveQueue(); render(); pump();
 }
 
-function closeModal() {
-  document.getElementById('modal-bg').classList.remove('open');
-  activeItem = null;
-  pendingPhoto = null;
+var pumping = false;
+function pump(){
+  if(pumping || !queue.length) return;
+  if(!UPLOAD_URL){ flushOffline(); return; }
+  if(!navigator.onLine) return;
+  pumping = true;
+  var job = queue[0];
+
+  fetch(UPLOAD_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ fid: fid(), name: local.name, taskId: job.taskId, image: job.data })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    pumping = false;
+    if(res && res.ok){
+      queue.shift(); saveQueue();
+      writeTask(job.taskId, { status:"pending", fileId:res.fileId, at:Date.now() });
+      render(); pump();
+    }else{ retry(job); }
+  })
+  .catch(function(){ pumping = false; retry(job); });
 }
 
-function closeModalBg(e) {
-  if (e.target === document.getElementById('modal-bg')) closeModal();
+function retry(job){
+  job.tries = (job.tries || 0) + 1;
+  saveQueue(); render();
+  setTimeout(pump, Math.min(30000, 3000 * job.tries));
 }
 
-load();
+/* 沒有上傳網址時的退路：狀態照走，照片只留在本機 */
+function flushOffline(){
+  while(queue.length){
+    var j = queue.shift();
+    writeTask(j.taskId, { status:"pending", fileId:"", at:Date.now() });
+  }
+  saveQueue(); render();
+}
+
+function writeTask(id, obj){
+  remote.tasks[id] = obj;
+  if(fref) fref.child("tasks/" + id).set(obj);
+}
+
+window.addEventListener("online",  function(){ online = true;  render(); pump(); });
+window.addEventListener("offline", function(){ online = false; render(); });
+setInterval(pump, 15000);
+
+/* ── 拍照 ── */
+var camTarget = null;
+document.getElementById("cam").addEventListener("change", function(e){
+  var f = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if(!f || !camTarget) return;
+  var id = camTarget;
+  resize(f, 320, 0.6, function(thumb){
+    if(thumb){ local.thumbs[id] = thumb; saveLocal(); }
+    resize(f, 1000, 0.7, function(full){
+      if(!full){ alert("照片讀取失敗，請再拍一次。"); return; }
+      enqueue(id, full);
+    });
+  });
+});
+function shoot(id){ camTarget = id; document.getElementById("cam").click(); }
+
+/* ── 畫面 ── */
+function render(){
+  var el = document.getElementById("app");
+  if(!local.name){ el.innerHTML = pageEnter(); bindEnter(); return; }
+  if(view.page === "zone")      el.innerHTML = pageZone();
+  else if(view.page === "task") el.innerHTML = pageTask();
+  else                          el.innerHTML = pageHome();
+  bind();
+}
+
+function banner(){
+  return '<div class="banner">你現在是從通訊軟體內建的瀏覽器開啟，相機可能無法使用。<br>請按畫面右上角選單，選擇「用 Safari 開啟」或「用 Chrome 開啟」。</div>';
+}
+function netbar(){
+  var n = queue.length;
+  if(!n) return "";
+  return '<div class="netbar">有 ' + n + ' 張照片正在背景上傳，收訊恢復會自動送出，可以先去下一個任務。</div>';
+}
+
+function pageEnter(){
+  return '<div class="topbar"></div>'
+    + '<p class="eyebrow">WULAI FIELD GUIDE</p>'
+    + '<h1 class="title">百濟探索圖鑑</h1>'
+    + '<p class="sub">烏來・山林文化探索　2026.10.17</p>'
+    + '<div class="weave" style="margin:22px 0 26px"></div>'
+    + '<p style="font-size:15px;margin-bottom:14px">先留下你們的名字，圖鑑會記在這支手機上。</p>'
+    + '<input type="text" id="nm" placeholder="例如：王家、陳小明" maxlength="12" autocomplete="off">'
+    + '<p class="err hide" id="nmerr">請先輸入名字</p>'
+    + '<button class="btn" id="go">開始探索</button>'
+    + '<p class="note">全家一起玩就填家庭名，一個人玩就填自己的名字。之後可以在總覽頁底下重設。</p>'
+    + (inAppBrowser() ? banner() : "");
+}
+function bindEnter(){
+  document.getElementById("go").onclick = function(){
+    var v = document.getElementById("nm").value.trim();
+    if(!v){ document.getElementById("nmerr").classList.remove("hide"); return; }
+    local.name = v; saveLocal();
+    if(fref) fref.update({ name:v, createdAt:Date.now() });
+    go("home");
+  };
+  document.getElementById("nm").oninput = function(){ document.getElementById("nmerr").classList.add("hide"); };
+}
+
+function pageHome(){
+  var n = approvedCount();
+  var tally = TASKS.map(function(x,i){
+    var on = statusOf(x.id) === "approved" ? " on" : "";
+    var tier = (i === 7 || i === 11) ? " tier" : "";
+    return '<i class="' + on + tier + '"></i>';
+  }).join("");
+
+  var zones = ZONES.map(function(z){
+    var c = zoneCount(z.id);
+    return '<button class="card" data-zone="' + z.id + '">'
+      + '<div class="card-row"><div>'
+      + '<div class="card-name">' + z.name + '</div>'
+      + '<div class="card-sub">' + z.sub + '</div></div>'
+      + '<div class="count' + (c ? "" : " zero") + '">' + c + ' / 4</div></div></button>';
+  }).join("");
+
+  var prizes = PRIZES.map(function(p,i){
+    var got = n >= p.at;
+    var claimed = !!remote.claimed["t" + p.at];
+    var label = p.name || ("第 " + (i+1) + " 階段獎勵");
+    return '<div class="prize' + (got ? "" : " locked") + '"><b>' + p.at + '</b><span>' + esc(label)
+      + '<em>' + (claimed ? "已領取" : got ? "可領取，請找工作人員" : "完成 " + p.at + " 張後解鎖") + '</em></span></div>';
+  }).join("");
+
+  return '<div class="topbar"></div>'
+    + '<p class="eyebrow">WULAI FIELD GUIDE</p>'
+    + '<h1 class="title">百濟探索圖鑑</h1>'
+    + '<p class="sub">' + esc(local.name) + '　已通過 ' + n + ' / 12</p>'
+    + '<div class="tally">' + tally + '</div>'
+    + '<div class="tally-legend"><span></span><span>8</span><span>12</span></div>'
+    + netbar()
+    + '<h2 style="font-size:17px;margin:30px 0 12px">三個區域</h2>' + zones
+    + '<h2 style="font-size:17px;margin:30px 0 4px">獎勵</h2>' + prizes
+    + (inAppBrowser() ? banner() : "")
+    + '<div class="foot"><span>' + EVENT_INFO + '</span><button id="reset">重設</button></div>';
+}
+
+function pageZone(){
+  var z = ZONES.filter(function(x){ return x.id === view.zone; })[0];
+  var rows = TASKS.filter(function(x){ return x.zone === z.id; }).map(function(x){
+    var st = statusOf(x.id), th = local.thumbs[x.id];
+    return '<button class="task" data-task="' + x.id + '">'
+      + '<div class="thumb">' + (th ? '<img src="' + th + '" alt="">' : ICON_CAM) + '</div>'
+      + '<div><div class="task-text">' + x.text + '</div>' + tagOf(st) + '</div></button>';
+  }).join("");
+
+  return '<div class="topbar"><button class="back" id="bk">' + ICON_BACK + '返回總覽</button></div>'
+    + '<p class="eyebrow">' + z.sub + '</p>'
+    + '<h1 class="title">' + z.name + '</h1>'
+    + '<p class="sub">已通過 ' + zoneCount(z.id) + ' / 4</p>'
+    + '<div class="weave" style="margin:18px 0 4px"></div>' + rows;
+}
+
+function tagOf(s){
+  if(s === "approved")  return '<span class="tag t-approved">已通過</span>';
+  if(s === "pending")   return '<span class="tag t-pending">審核中</span>';
+  if(s === "uploading") return '<span class="tag t-pending">上傳中</span>';
+  if(s === "rejected")  return '<span class="tag t-rejected">退回，請重拍</span>';
+  return '<span class="tag t-todo">未完成</span>';
+}
+
+function pageTask(){
+  var x = TASKS.filter(function(a){ return a.id === view.task; })[0];
+  var z = ZONES.filter(function(a){ return a.id === x.zone; })[0];
+  var st = statusOf(x.id), th = local.thumbs[x.id];
+
+  var msg = {
+    todo:      "拍好之後會送出審核，工作人員確認就會計入進度。",
+    uploading: "照片在背景上傳中，可以先去下一個任務，收訊恢復會自動送出。",
+    pending:   "已送出，工作人員審核中。通過時這頁會自動更新。",
+    approved:  "已通過，這張卡收進圖鑑了。",
+    rejected:  "這張沒通過，照著任務敘述再拍一次就好。"
+  }[st];
+
+  var btn = "";
+  if(st === "todo")      btn = '<button class="btn" id="shoot">拍照</button>';
+  if(st === "rejected")  btn = '<button class="btn" id="shoot">重新拍照</button>';
+  if(st === "pending")   btn = '<button class="btn ghost" id="shoot">換一張照片</button>';
+  if(st === "uploading") btn = '<div class="bar"><i></i></div>';
+
+  return '<div class="topbar"><button class="back" id="bk">' + ICON_BACK + z.name + '</button></div>'
+    + '<div class="hero">' + (th ? '<img src="' + th + '" alt="">' : ICON_CAM) + '</div>'
+    + '<h1 style="font-size:19px;line-height:1.55">' + x.text + '</h1>'
+    + tagOf(st)
+    + '<p class="note" style="margin-top:12px">' + msg + '</p>' + btn;
+}
+
+function bind(){
+  var bk = document.getElementById("bk");
+  if(bk) bk.onclick = function(){ view.page === "task" ? go("zone",{zone:view.zone}) : go("home"); };
+
+  Array.prototype.forEach.call(document.querySelectorAll("[data-zone]"), function(b){
+    b.onclick = function(){ go("zone", { zone:b.getAttribute("data-zone") }); };
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-task]"), function(b){
+    b.onclick = function(){ go("task", { zone:view.zone, task:b.getAttribute("data-task") }); };
+  });
+  var sh = document.getElementById("shoot");
+  if(sh) sh.onclick = function(){ shoot(view.task); };
+
+  var rs = document.getElementById("reset");
+  if(rs) rs.onclick = function(){
+    if(!confirm("重設會清掉名字與這支手機上的照片，進度也會重新開始，確定嗎？")) return;
+    if(fref) fref.remove();
+    localStorage.removeItem(LS_FID); localStorage.removeItem(LS_LOCAL); localStorage.removeItem(LS_QUEUE);
+    location.reload();
+  };
+}
+
+connect();
 render();
+pump();
 </script>
 </body>
 </html>
