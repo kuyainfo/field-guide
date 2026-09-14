@@ -163,7 +163,7 @@ var PRIZES = [
 
 /* ══════════════ 以下不需要修改 ══════════════ */
 
-var LS_FID = "fg_fid", LS_LOCAL = "fg_local_v2", LS_QUEUE = "fg_queue_v2";
+var LS_FID = "fg_fid", LS_LOCAL = "fg_local_v2", LS_QUEUE = "fg_queue_v2", LS_IGNORE = "fg_ignore_inapp";
 var db = null, fref = null;
 
 var remote = { name:"", dept:"", tasks:{}, claimed:{} };
@@ -232,6 +232,58 @@ function go(p,a){ view.page=p; view.zone=(a&&a.zone)||null; view.task=(a&&a.task
 function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
 var ICON_CAM  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8.5h3.2l1.3-2h8l1.3 2H20v11H3z"/><circle cx="11.5" cy="13.5" r="3.4"/></svg>';
 var ICON_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg>';
+
+function isAndroid(){ return /Android/i.test(navigator.userAgent || ""); }
+function siteUrl(){ return location.origin + location.pathname; }
+
+function pageBlock(){
+  var u = siteUrl();
+  var android = isAndroid()
+    ? '<button class="btn" id="openchrome">用 Chrome 開啟</button>'
+    : '';
+  return '<div class="topbar"></div>'
+    + '<p class="eyebrow">WULAI FIELD GUIDE</p>'
+    + '<h1 class="title">請換個瀏覽器開啟</h1>'
+    + '<div class="weave" style="margin:20px 0 22px"></div>'
+    + '<p style="font-size:15px;line-height:1.8">你現在是從通訊軟體內建的瀏覽器開啟，'
+    + '這裡<b>叫不出相機</b>，而且進度可能存不住。</p>'
+    + '<p class="note" style="margin-top:14px;font-size:13.5px;line-height:1.8">'
+    + 'iPhone：按畫面<b>右下角</b>的箭頭圖示，選「用 Safari 開啟」。<br>'
+    + 'Android：按<b>右上角</b>三個點，選「用其他瀏覽器開啟」。</p>'
+    + android
+    + '<button class="btn' + (android ? ' ghost' : '') + '" id="copylink">複製網址，自己貼到瀏覽器</button>'
+    + '<p class="note" id="copied" style="color:var(--grain)"></p>'
+    + '<p style="margin-top:22px"><button class="back" id="anyway" style="text-decoration:underline">仍要在這裡繼續</button></p>';
+}
+
+function bindBlock(){
+  var a = document.getElementById("openchrome");
+  if(a) a.onclick = function(){
+    var u = siteUrl().replace(/^https?:\/\//, "");
+    location.href = "intent://" + u + "#Intent;scheme=https;package=com.android.chrome;end";
+  };
+
+  var c = document.getElementById("copylink");
+  if(c) c.onclick = function(){
+    var u = siteUrl();
+    var done = function(){ document.getElementById("copied").textContent = "已複製：" + u; };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(u).then(done, function(){ prompt("請長按複製這段網址", u); });
+    }else{
+      prompt("請長按複製這段網址", u);
+    }
+  };
+
+  var k = document.getElementById("anyway");
+  if(k) k.onclick = function(){
+    try{ localStorage.setItem(LS_IGNORE, "1"); }catch(e){}
+    ignoreInApp = true;
+    render();
+  };
+}
+
+var ignoreInApp = false;
+try{ ignoreInApp = localStorage.getItem(LS_IGNORE) === "1"; }catch(e){}
 
 function inAppBrowser(){
   var u = navigator.userAgent || "";
@@ -370,6 +422,7 @@ function shoot(id, src){ camTarget = id; document.getElementById(src === "lib" ?
 /* ── 畫面 ── */
 function render(){
   var el = document.getElementById("app");
+  if(inAppBrowser() && !ignoreInApp){ el.innerHTML = pageBlock(); bindBlock(); return; }
   if(!local.name){ el.innerHTML = pageEnter(); bindEnter(); return; }
   if(view.page === "zone")      el.innerHTML = pageZone();
   else if(view.page === "task") el.innerHTML = pageTask();
