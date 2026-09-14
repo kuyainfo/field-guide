@@ -290,7 +290,7 @@ function inAppBrowser(){
   return /Line\//i.test(u) || /FBAN|FBAV|Instagram/i.test(u) || /MicroMessenger/i.test(u);
 }
 
-/* 縮圖：給本機顯示用，長邊 320、品質 .6 */
+/* 縮圖：給本機顯示用，長邊 240、品質 .5 */
 /* 上傳圖：長邊 1000、品質 .7 */
 function resize(file, max, q, cb){
   var img = new Image(), url = URL.createObjectURL(file);
@@ -308,14 +308,72 @@ function resize(file, max, q, cb){
   img.src = url;
 }
 
+/* ── 照片暫存：放 IndexedDB，不佔 localStorage 的 5MB 額度 ── */
+var IDB_NAME = "fg_photos", IDB_STORE = "blobs";
+var memBlobs = {};            /* IndexedDB 不可用時的退路 */
+
+function idbOpen(cb){
+  try{
+    if(!window.indexedDB){ cb(null); return; }
+    var rq = indexedDB.open(IDB_NAME, 1);
+    rq.onupgradeneeded = function(){ rq.result.createObjectStore(IDB_STORE); };
+    rq.onsuccess = function(){ cb(rq.result); };
+    rq.onerror   = function(){ cb(null); };
+  }catch(e){ cb(null); }
+}
+
+function idbPut(key, val, cb){
+  idbOpen(function(db){
+    if(!db){ cb(false); return; }
+    try{
+      var tx = db.transaction(IDB_STORE, "readwrite");
+      tx.objectStore(IDB_STORE).put(val, key);
+      tx.oncomplete = function(){ cb(true); };
+      tx.onerror    = function(){ cb(false); };
+      tx.onabort    = function(){ cb(false); };
+    }catch(e){ cb(false); }
+  });
+}
+
+function idbGet(key, cb){
+  idbOpen(function(db){
+    if(!db){ cb(null); return; }
+    try{
+      var rq = db.transaction(IDB_STORE, "readonly").objectStore(IDB_STORE).get(key);
+      rq.onsuccess = function(){ cb(rq.result || null); };
+      rq.onerror   = function(){ cb(null); };
+    }catch(e){ cb(null); }
+  });
+}
+
+function idbDel(key){
+  idbOpen(function(db){
+    if(!db) return;
+    try{ db.transaction(IDB_STORE, "readwrite").objectStore(IDB_STORE).delete(key); }catch(e){}
+  });
+}
+
+function jobData(job, cb){
+  if(memBlobs[job.key]){ cb(memBlobs[job.key]); return; }
+  idbGet(job.key, cb);
+}
+
 /* ── 上傳佇列：拍完立刻入列，背景重試，不擋操作 ── */
 var UP_TIMEOUT = 45000;   /* 單次上傳逾時 */
-var UP_STUCK   = 60000;   /* 看門狗：超過就強制解鎖 */
+var UP_STUCK   = 75000;   /* 看門狗：超過就強制解鎖 */
 
 function enqueue(taskId, dataUrl){
   /* 同一任務換照片：舊的留在佇列外，回應回來會被視為作廢 */
   queue = queue.filter(function(x){ return x.taskId !== taskId; });
-  queue.push({ taskId:taskId, data:dataUrl, tries:0, err:"" });
+
+  var key = "p_" + fid() + "_" + taskId;
+  memBlobs[key] = dataUrl;
+  idbPut(key, dataUrl, function(ok){
+    if(!ok) return;                 /* 存不進去就只靠記憶體，重新整理才會遺失 */
+    delete memBlobs[key];           /* 進了 IndexedDB 就把記憶體讓出來 */
+  });
+
+  queue.push({ taskId:taskId, key:key, tries:0, err:"" });
   saveQueue(); render(); pump();
 }
 
@@ -334,13 +392,31 @@ function pump(){
   inflightSince = Date.now();
   var job = queue[0];
 
+  jobData(job, function(data){
+    if(!data){
+      /* 照片不見了（清了瀏覽器資料或存檔失敗），移出佇列讓玩家重拍 */
+      pumping = false;
+      var k = queue.indexOf(job);
+      if(k >= 0){ queue.splice(k, 1); saveQueue(); }
+      render(); pump();
+      return;
+    }
+    send(job, data);
+  });
+}
+
+function send(job, data){
   var ctl = (typeof AbortController !== "undefined") ? new AbortController() : null;
   var killer = setTimeout(function(){ if(ctl) ctl.abort(); }, UP_TIMEOUT);
 
   var opt = {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ fid: fid(), name: local.name, dept: local.dept, taskId: job.taskId, image: job.data })
+    body: JSON.stringify({
+      fid: fid(), name: local.name, dept: local.dept, taskId: job.taskId,
+      prev: (remote.tasks[job.taskId] && remote.tasks[job.taskId].fileId) || "",
+      image: data
+    })
   };
   if(ctl) opt.signal = ctl.signal;
 
@@ -353,10 +429,13 @@ function pump(){
     if(i < 0){ pump(); return; }        /* 已被新照片取代，這次結果作廢 */
     if(res && res.ok){
       queue.splice(i, 1); saveQueue();
+      idbDel(job.key); delete memBlobs[job.key];
       writeTask(job.taskId, { status:"pending", fileId:res.fileId, at:Date.now() });
       render(); pump();
     }else{
-      job.err = (res && res.error) ? String(res.error) : "伺服器沒有回傳成功";
+      var e = (res && res.error) ? String(res.error) : "伺服器沒有回傳成功";
+      job.busy = /too many|quota|exceeded|invoked|limit/i.test(e);
+      job.err  = job.busy ? "伺服器忙碌中" : e;
       retry(job);
     }
   })
@@ -364,6 +443,7 @@ function pump(){
     clearTimeout(killer);
     pumping = false;
     var msg = String((e && e.message) || e);
+    job.busy = false;
     job.err = /abort/i.test(msg) ? "上傳逾時" : "連線失敗";
     retry(job);
   });
@@ -372,7 +452,10 @@ function pump(){
 function retry(job){
   job.tries = (job.tries || 0) + 1;
   saveQueue(); render();
-  setTimeout(pump, Math.min(30000, 3000 * job.tries));
+  /* 壅塞時退得更久；每次都加隨機抖動，避免全場同時重試 */
+  var base = job.busy ? 15000 : 3000;
+  var wait = Math.min(45000, base * job.tries) + Math.floor(Math.random() * 4000);
+  setTimeout(pump, wait);
 }
 
 function queueTrouble(){
@@ -407,7 +490,7 @@ function onPicked(e){
   e.target.value = "";
   if(!f || !camTarget) return;
   var id = camTarget;
-  resize(f, 320, 0.6, function(thumb){
+  resize(f, 240, 0.5, function(thumb){
     if(thumb){ local.thumbs[id] = thumb; saveLocal(); }
     resize(f, 1000, 0.7, function(full){
       if(!full){ alert("照片讀取失敗，請再拍一次。"); return; }
