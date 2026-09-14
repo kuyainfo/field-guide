@@ -166,12 +166,13 @@ var PRIZES = [
 var LS_FID = "fg_fid", LS_LOCAL = "fg_local_v2", LS_QUEUE = "fg_queue_v2";
 var db = null, fref = null;
 
-var remote = { name:"", tasks:{}, claimed:{} };   /* Firebase 上的真實狀態 */
+var remote = { name:"", dept:"", tasks:{}, claimed:{} };
+var seenRemote = false;   /* Firebase 上的真實狀態 */
 var local  = loadLocal();                          /* 本機縮圖與樂觀狀態 */
 var queue  = loadQueue();                          /* 待上傳佇列 */
 var online = navigator.onLine;
 
-function loadLocal(){ try{ return JSON.parse(localStorage.getItem(LS_LOCAL)) || { name:"", thumbs:{} }; }catch(e){ return { name:"", thumbs:{} }; } }
+function loadLocal(){ try{ return JSON.parse(localStorage.getItem(LS_LOCAL)) || { name:"", dept:"", thumbs:{} }; }catch(e){ return { name:"", dept:"", thumbs:{} }; } }
 function saveLocal(){ try{ localStorage.setItem(LS_LOCAL, JSON.stringify(local)); }catch(e){} }
 function loadQueue(){ try{ return JSON.parse(localStorage.getItem(LS_QUEUE)) || []; }catch(e){ return []; } }
 function saveQueue(){ try{ localStorage.setItem(LS_QUEUE, JSON.stringify(queue)); }catch(e){} }
@@ -194,11 +195,21 @@ function connect(){
     db = firebase.database();
     fref = db.ref(DB_ROOT + "/families/" + fid());
     fref.on("value", function(snap){
+      if(snap.exists()){
+        seenRemote = true;
+      }else if(seenRemote){
+        localStorage.removeItem(LS_FID);
+        localStorage.removeItem(LS_LOCAL);
+        localStorage.removeItem(LS_QUEUE);
+        location.reload();
+        return;
+      }
       var v = snap.val() || {};
       remote.name    = v.name || "";
+      remote.dept    = v.dept || "";
       remote.tasks   = v.tasks || {};
       remote.claimed = v.claimed || {};
-      if(remote.name && !local.name){ local.name = remote.name; saveLocal(); }
+      if(remote.name && !local.name){ local.name = remote.name; local.dept = remote.dept; saveLocal(); }
       render();
     });
   }catch(e){ db = null; }
@@ -345,22 +356,26 @@ function pageEnter(){
     + '<h1 class="title">百濟探索圖鑑</h1>'
     + '<p class="sub">烏來・山林文化探索　2026.10.17</p>'
     + '<div class="weave" style="margin:22px 0 26px"></div>'
-    + '<p style="font-size:15px;margin-bottom:14px">先留下你們的名字，圖鑑會記在這支手機上。</p>'
+    + '<p style="font-size:15px;margin-bottom:14px">先留下名字與部門，圖鑑會記在這支手機上。</p>'
     + '<input type="text" id="nm" placeholder="例如：王家、陳小明" maxlength="12" autocomplete="off">'
-    + '<p class="err hide" id="nmerr">請先輸入名字</p>'
+    + '<input type="text" id="dp" placeholder="部門，例如：研發部" maxlength="14" autocomplete="off" style="margin-top:10px">'
+    + '<p class="err hide" id="nmerr">名字與部門都要填</p>'
     + '<button class="btn" id="go">開始探索</button>'
-    + '<p class="note">全家一起玩就填家庭名，一個人玩就填自己的名字。之後可以在總覽頁底下重設。</p>'
+    + '<p class="note">全家一起玩就填家庭名，一個人玩就填自己的名字；部門是給工作人員區分同名用的。之後可以在總覽頁底下重設。</p>'
     + (inAppBrowser() ? banner() : "");
 }
 function bindEnter(){
   document.getElementById("go").onclick = function(){
     var v = document.getElementById("nm").value.trim();
-    if(!v){ document.getElementById("nmerr").classList.remove("hide"); return; }
-    local.name = v; saveLocal();
-    if(fref) fref.update({ name:v, createdAt:Date.now() });
+    var d = document.getElementById("dp").value.trim();
+    if(!v || !d){ document.getElementById("nmerr").classList.remove("hide"); return; }
+    local.name = v; local.dept = d; saveLocal();
+    if(fref) fref.update({ name:v, dept:d, createdAt:Date.now() });
     go("home");
   };
-  document.getElementById("nm").oninput = function(){ document.getElementById("nmerr").classList.add("hide"); };
+  function clearErr(){ document.getElementById("nmerr").classList.add("hide"); }
+  document.getElementById("nm").oninput = clearErr;
+  document.getElementById("dp").oninput = clearErr;
 }
 
 function pageHome(){
@@ -391,7 +406,7 @@ function pageHome(){
   return '<div class="topbar"></div>'
     + '<p class="eyebrow">WULAI FIELD GUIDE</p>'
     + '<h1 class="title">百濟探索圖鑑</h1>'
-    + '<p class="sub">' + esc(local.name) + '　已通過 ' + n + ' / 12</p>'
+    + '<p class="sub">' + esc(local.name) + (local.dept ? '・' + esc(local.dept) : '') + '　已通過 ' + n + ' / 12</p>'
     + '<div class="tally">' + tally + '</div>'
     + '<div class="tally-legend"><span></span><span>8</span><span>12</span></div>'
     + netbar()
