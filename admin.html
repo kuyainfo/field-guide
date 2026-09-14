@@ -282,13 +282,23 @@ function famBlock(fid){
     var g = pick.filter(function(t){ return t.zone === z; });
     if(!g.length) return;
 
-    var np = g.filter(function(t){
-      return tasks[t.id] && tasks[t.id].status === "pending";
-    }).length;
+    var tally = { pending:0, approved:0, rejected:0, none:0 };
+    g.forEach(function(t){
+      var s = tasks[t.id] && tasks[t.id].status;
+      if(s === "pending" || s === "approved" || s === "rejected") tally[s]++;
+      else tally.none++;
+    });
+
+    var np = tally.pending;
+    var parts = [];
+    if(tally.pending)  parts.push(tally.pending  + " 待審");
+    if(tally.approved) parts.push(tally.approved + " 已通過");
+    if(tally.rejected) parts.push(tally.rejected + " 已退回");
+    if(tally.none)     parts.push(tally.none     + " 未上傳");
 
     var key = fid + "|" + z;
     var open = (key in zoneOpen) ? zoneOpen[key] : (np > 0);
-    var cnt = np ? (np + " 張待審") : (g.length + " 張，已審完");
+    var cnt = parts.join("\u30fb");
 
     var cards = open
       ? '<div class="grid">' + g.map(function(t){ return shotCard(fid, tasks[t.id], t); }).join("") + '</div>'
