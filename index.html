@@ -840,17 +840,14 @@ function mapPanel(cfg, key, rivers, roads, rail, route, scaleX, scaleY){
     + '</svg>';
 }
 
-function mapChips(key){
+function mapChips(){
   var out = "";
-  MAP_PINS.filter(function(m){ return !key || m.p === key; }).forEach(function(m){
-    (m.t || []).forEach(function(id){
-      var t = null;
-      TASKS.forEach(function(a){ if(a.id === id) t = a; });
-      if(!t) return;
-      var done = statusOf(id) === "approved";
-      out += '<button class="chip z' + m.z + (done ? " on" : "") + '" data-jump="' + id
-        + '" data-jz="' + t.zone + '">' + (MAP_SHORT[id] || id) + '</button>';
-    });
+  TASKS.forEach(function(t){
+    var zi = 1;
+    ZONES.forEach(function(a, k){ if(a.id === t.zone) zi = k + 1; });
+    var done = statusOf(t.id) === "approved";
+    out += '<button class="chip z' + zi + (done ? " on" : "") + '" data-jump="' + t.id
+      + '" data-jz="' + t.zone + '">' + (MAP_SHORT[t.id] || t.id) + '</button>';
   });
   return '<div class="chips">' + out + '</div>';
 }
@@ -870,7 +867,7 @@ function pageMap(){
     + '<div class="mapgap"><i></i><span>烏來台車　1.3 公里　約 10 分鐘</span><i></i></div>'
     + mapPanel(MAP_B, "B", MAP_RIVER_B, MAP_ROAD_B, MAP_RAIL_B, MAP_ROUTE_B, -212, 1108)
     + '<h2 class="sect" style="margin:18px 0 8px">十二張任務</h2>'
-    + mapChips(null)
+    + mapChips()
     + '<p class="note">底圖依實際座標繪製，兩張圖同一比例。點任務標籤可直接跳到那一張卡。</p>';
 }
 function pageZone(){
