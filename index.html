@@ -3,104 +3,196 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0F1D16">
+<meta name="theme-color" content="#FAF6ED">
 <title>百濟探索圖鑑｜烏來</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Caveat:wght@700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --moss:#0F1D16; --moss-2:#172C22; --moss-3:#1F3A2C; --line:#2E5241;
-  --linen:#EDE6D6; --linen-dim:#9DAE9F;
-  --thread:#B0362A; --thread-lit:#D9553F; --grain:#C8A75C;
+  --cream:#FAF6ED; --cream-2:#F3ECDC; --card:#FFFFFF;
+  --edge:#EADFC8; --edge-2:#E0D4BA;
+  --ink:#1D4A33; --ink-2:#55665A; --ink-3:#8E8267;
+  --act:#C4482A; --act-dark:#A93A1F; --act-text:#B23E22;
+  --gold:#8F6212; --gold-bg:#F5E7C3; --gold-line:#B8891F;
+  --z1:#C4482A; --z2:#8F6212; --z3:#2A6070;
+  --wv:#C4482A;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{background:var(--moss);color:var(--linen)}
+html,body{background:var(--cream);color:var(--ink)}
 body{font-family:"Noto Sans TC",system-ui,sans-serif;font-size:15px;line-height:1.75;
   padding:0 20px calc(40px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;
   -webkit-font-smoothing:antialiased}
-h1,h2{font-family:"Noto Serif TC",serif;font-weight:700;letter-spacing:.02em}
+h1,h2{font-weight:900;letter-spacing:.02em}
 button{font-family:inherit;font-size:inherit;color:inherit;background:none;border:none;cursor:pointer}
-:focus-visible{outline:2px solid var(--grain);outline-offset:3px}
+:focus-visible{outline:2px solid var(--act);outline-offset:3px}
 .hide{display:none !important}
 
-.weave{height:14px;width:100%;
-  background-image:linear-gradient(135deg,var(--line) 25%,transparent 25%),
-    linear-gradient(225deg,var(--line) 25%,transparent 25%),
-    linear-gradient(45deg,var(--line) 25%,transparent 25%),
-    linear-gradient(315deg,var(--line) 25%,transparent 25%);
-  background-size:14px 14px;opacity:.55}
+/* 泰雅織紋帶：45 度雙向細線交織成菱形格 */
+.weave{height:16px;margin:0 -20px;background-color:var(--cream-2);
+  background-image:
+    repeating-linear-gradient(45deg,var(--wv) 0 1.5px,transparent 1.5px 13px),
+    repeating-linear-gradient(-45deg,var(--ink) 0 1.5px,transparent 1.5px 13px)}
+.weave.gap{margin:22px -20px 26px}
+.weave.z1{--wv:#C4482A}.weave.z2{--wv:#8F6212}.weave.z3{--wv:#2A6070}
 
-.topbar{display:flex;align-items:center;gap:10px;padding:22px 0 14px;min-height:64px}
-.back{display:flex;align-items:center;gap:5px;color:var(--linen-dim);font-size:13.5px;padding:6px 2px}
+.brand{display:flex;align-items:center;gap:10px;padding-top:20px}
+.brand .chip{background:#fff;border:1px solid var(--edge);border-radius:6px;padding:3px 7px;line-height:0;flex:none}
+.brand .chip img{height:22px;width:auto;display:block}
+.brand span{font-size:11.5px;letter-spacing:.06em;color:var(--ink-2)}
+
+.topbar{display:flex;align-items:center;gap:10px;padding:16px 0 10px;min-height:52px}
+.back{display:flex;align-items:center;gap:5px;color:var(--ink-2);font-size:13.5px;padding:6px 2px}
 .back svg{width:14px;height:14px}
-.eyebrow{font-size:12px;color:var(--grain);letter-spacing:.18em}
-.title{font-size:25px;line-height:1.3;margin-top:2px}
-.sub{color:var(--linen-dim);font-size:13.5px;margin-top:4px}
+.eyebrow{font-family:Caveat,cursive;font-size:27px;line-height:1;color:var(--act-text);margin-top:10px}
+.title{font-size:30px;line-height:1.18;margin-top:2px;color:var(--ink)}
+.sub{color:var(--ink-2);font-size:13px;margin-top:4px}
+.sect{font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--ink-2);margin:26px 0 10px}
 
-.tally{display:flex;gap:5px;margin:20px 0 8px}
-.tally i{flex:1;height:18px;background:var(--moss-3);
+.prog{background:var(--card);border:1px solid var(--edge);border-radius:16px;padding:15px 16px;margin-top:18px}
+.prog-head{display:flex;align-items:baseline;gap:8px;margin-bottom:11px}
+.prog-head b{font-size:15px;font-weight:700}
+.prog-head em{font-style:normal;font-size:12px;color:var(--ink-2)}
+.prog-head .n{margin-left:auto;font-size:13px;font-weight:700;color:var(--act-text)}
+.tally{display:flex;gap:5px}
+.tally i{flex:1;height:20px;background:#EFE7D5;
   clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);transition:background .35s}
-.tally i.on{background:var(--thread)}
-.tally i.tier{outline:1px solid var(--grain);outline-offset:2px}
-.tally-legend{display:flex;justify-content:space-between;font-size:11.5px;color:var(--linen-dim)}
+.tally i.tier{background:var(--gold-bg)}
+.tally i.on{background:var(--ink)}
+.tally-legend{display:grid;grid-template-columns:repeat(12,1fr);gap:5px;margin-top:5px;
+  font-size:11px;color:var(--gold);text-align:center;font-weight:700}
 
-.card{display:block;width:100%;text-align:left;background:var(--moss-2);
-  border:1px solid var(--line);border-radius:3px;padding:14px 16px;margin-bottom:10px}
-.card:active{background:var(--moss-3)}
-.card-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
-.card-name{font-size:16.5px;font-family:"Noto Serif TC",serif;font-weight:500}
-.card-sub{font-size:12.5px;color:var(--linen-dim);margin-top:1px}
-.count{font-size:13px;color:var(--grain);white-space:nowrap}
-.count.zero{color:var(--linen-dim)}
+.card{display:flex;align-items:center;gap:13px;width:100%;text-align:left;background:var(--card);
+  border:1px solid var(--edge);border-radius:14px;padding:13px 15px;margin-bottom:9px}
+.card:active{background:#FBF7EE}
+.zmark{width:26px;height:26px;flex:none;border-radius:4px;transform:rotate(45deg)}
+.zmark.z1{background:var(--z1)}.zmark.z2{background:var(--z2)}.zmark.z3{background:var(--z3)}
+.card-main{flex:1 1 auto;min-width:0}
+.card-name{display:block;font-size:15.5px;font-weight:700;color:var(--ink)}
+.card-sub{display:block;font-size:11.5px;color:var(--ink-2);margin-top:1px;line-height:1.5}
+.card-end{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.count{font-size:13px;font-weight:700;color:var(--ink)}
+.count.zero{color:var(--ink-2)}
+.pips{display:flex;gap:4px}
+.pips i{width:9px;height:9px;background:var(--edge-2);border-radius:2px;transform:rotate(45deg)}
+.pips i.on{background:var(--ink)}
 
-.task{display:flex;gap:13px;align-items:flex-start;width:100%;text-align:left;
-  padding:14px 4px;border-bottom:1px solid var(--moss-3)}
-.task:last-of-type{border-bottom:none}
-.thumb{width:52px;height:52px;flex:none;border-radius:2px;background:var(--moss-2);
-  border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
-  color:var(--line);overflow:hidden}
+.zhead{display:flex;align-items:center;gap:13px;margin-top:2px}
+.zhead .zmark{width:30px;height:30px;border-radius:5px}
+.zhead-main{flex:1 1 auto;min-width:0}
+.zhead-main .title{font-size:25px;margin:0}
+.zsub{font-size:12.5px;font-weight:500;margin-top:1px}
+.zsub.z1{color:var(--z1)}.zsub.z2{color:var(--z2)}.zsub.z3{color:var(--z3)}
+
+.task{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;
+  background:var(--card);border:1px solid var(--edge);border-radius:14px;padding:12px;margin-bottom:10px}
+.task.rej{border-color:#E8C9BE}
+.task:active{background:#FBF7EE}
+.thumb{width:64px;height:64px;flex:none;border-radius:9px;background:#F4EEE0;
+  border:1px dashed #D2C4A5;display:flex;align-items:center;justify-content:center;
+  color:#B3A484;overflow:hidden}
+.thumb.has{border:1px solid var(--edge);background:var(--card)}
 .thumb img{width:100%;height:100%;object-fit:cover}
-.thumb svg{width:22px;height:22px}
-.task-text{font-size:14.5px;line-height:1.6}
-.tag{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:2px;margin-top:5px;line-height:1.7}
-.t-todo{color:var(--linen-dim);border:1px solid var(--line)}
-.t-pending{color:var(--grain);border:1px solid var(--grain)}
-.t-approved{background:var(--thread);color:#FFF1EC}
-.t-rejected{background:#4A1712;color:var(--thread-lit)}
+.thumb svg{width:24px;height:24px}
+.task-body{flex:1 1 auto;min-width:0}
+.task-text{display:block;font-size:13.5px;line-height:1.55;color:#2C3B2F}
 
-.prize{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--moss-3)}
-.prize:last-child{border-bottom:none}
-.prize b{font-family:"Noto Serif TC",serif;font-size:19px;color:var(--grain);width:38px;flex:none}
-.prize span{font-size:14.5px}
-.prize em{font-style:normal;font-size:12px;color:var(--linen-dim);display:block}
-.prize.locked{opacity:.42}
+.tag{display:inline-block;font-size:11.5px;font-weight:500;padding:2px 10px;border-radius:999px;
+  margin-top:7px;line-height:1.7}
+.t-todo{background:#F1EADB;color:var(--ink-2)}
+.t-pending{background:var(--gold-bg);color:#6B4F0F}
+.t-approved{background:var(--ink);color:#F4F8F2}
+.t-rejected{background:var(--act-text);color:#FCEFEA}
+.tagrow{display:flex;gap:9px;align-items:center;margin-top:2px;flex-wrap:wrap}
+.tagrow .tag{margin-top:0}
+.t-zone.z1{background:var(--z1);color:#FAE3DC}
+.t-zone.z2{background:var(--z2);color:#F7ECCE}
+.t-zone.z3{background:var(--z3);color:#D8EEF3}
+.tasktitle{font-size:19.5px;font-weight:700;line-height:1.55;margin-top:11px;color:var(--ink)}
 
-.btn{display:block;width:100%;text-align:center;background:var(--thread);color:#FFF1EC;
-  padding:15px;border-radius:3px;font-size:16px;font-weight:500;margin-top:18px}
-.btn:active{background:var(--thread-lit)}
-.btn.ghost{background:none;border:1px solid var(--line);color:var(--linen-dim);font-size:14px;padding:12px}
-input[type=text]{width:100%;background:var(--moss-2);border:1px solid var(--line);
-  border-radius:3px;padding:14px;color:var(--linen);font-size:16px;font-family:inherit}
-input[type=text]::placeholder{color:#5C7566}
-.err{color:var(--thread-lit);font-size:13px;margin-top:8px}
-.note{font-size:12.5px;color:var(--linen-dim);margin-top:10px}
-.foot{margin-top:34px;padding-top:16px;border-top:1px solid var(--moss-3);
-  font-size:12px;color:#5C7566;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.prize{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--edge);
+  border-radius:14px;padding:12px 15px;margin-bottom:9px}
+.pmark{width:30px;height:30px;flex:none;border-radius:5px;transform:rotate(45deg);
+  background:var(--gold-bg);border:1.5px solid var(--gold-line);
+  display:flex;align-items:center;justify-content:center}
+.pmark b{transform:rotate(-45deg);font-size:13px;font-weight:900;color:#6B4F0F}
+.prize-main{flex:1 1 auto;min-width:0}
+.prize-name{display:block;font-size:14.5px;font-weight:700;color:var(--ink)}
+.prize-note{display:block;font-size:11.5px;color:var(--ink-2);line-height:1.5}
+.prize.locked{opacity:.6}
+.prize.locked .pmark{background:#F1EADB;border-color:#C6B893}
+.prize.locked .pmark b{color:var(--ink-2)}
 
-.hero{width:100%;aspect-ratio:4/3;background:var(--moss-2);border:1px solid var(--line);
-  border-radius:3px;display:flex;align-items:center;justify-content:center;
-  color:var(--line);overflow:hidden;margin-bottom:18px}
+.btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
+  background:var(--act);color:#FFF6F1;padding:16px;border-radius:12px;
+  font-size:16.5px;font-weight:700;letter-spacing:.04em;margin-top:12px}
+.btn:active{background:var(--act-dark)}
+.btn.ghost{background:transparent;border:1.5px solid #C0CDBE;color:var(--ink);
+  font-size:15px;font-weight:500;padding:14px}
+.btn.ghost:active{background:#F1EFE4}
+input[type=text]{width:100%;background:var(--card);border:1px solid var(--edge-2);
+  border-radius:12px;padding:14px;color:var(--ink);font-size:16px;font-family:inherit}
+input[type=text]::placeholder{color:#B3A484}
+.err{color:var(--act-text);font-size:13px;margin-top:8px}
+.note{font-size:12.5px;color:var(--ink-2);margin-top:10px;line-height:1.75}
+.foot{margin-top:30px;padding-top:16px;border-top:1px solid var(--edge);
+  font-size:12px;color:var(--ink-3);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.foot button{color:var(--ink-3);text-decoration:underline}
+
+.route-link{margin-top:12px}
+.mapicon{width:34px;height:34px;flex:none;border-radius:50%;background:#F1EADB;
+  display:flex;align-items:center;justify-content:center;color:var(--ink)}
+.mapicon svg{width:19px;height:19px}
+.chev{flex:none;color:var(--ink-3);display:flex;align-items:center}
+.chev svg{width:15px;height:15px}
+/* 路線地圖 */
+.mapsvg{display:block;width:100%;height:auto;background:#F3EDDF;border:1px solid var(--edge);
+  border-radius:14px;overflow:hidden}
+.mapsvg .mriver path{fill:none;stroke:#B9D4DD;stroke-width:30;stroke-linecap:round;stroke-linejoin:round}
+.mapsvg .mroad path{fill:none;stroke:#FFFFFF;stroke-width:9;stroke-linecap:round;stroke-linejoin:round}
+.mapsvg .mrail{fill:none;stroke:#C0AE84;stroke-width:4;stroke-dasharray:11 8;stroke-linecap:round}
+.mapsvg .mroute-case{fill:none;stroke:#FAF6ED;stroke-width:16;stroke-linecap:round;stroke-linejoin:round}
+.mapsvg .mroute{fill:none;stroke:#C4482A;stroke-width:9;stroke-linecap:round;stroke-linejoin:round}
+.mapsvg text{font-family:inherit;paint-order:stroke;stroke:#F3EDDF;stroke-width:6;stroke-linejoin:round}
+.mapsvg .mlab{font-size:23px;font-weight:700;fill:var(--ink)}
+.mapsvg .msub{font-size:17px;fill:var(--ink-2)}
+.mapsvg .mdot{font-size:18px;fill:var(--ink-2)}
+.mapsvg .mnote{font-size:16px;fill:#8E8267}
+.mapsvg .mscale path{fill:none;stroke:#A89A7C;stroke-width:2;stroke-linecap:butt}
+.mapsvg .mnorth path{fill:#A89A7C;stroke:none}
+.mapsvg .mwater{font-size:18px;font-weight:500;fill:#6E93A0;letter-spacing:.1em}
+.mapsvg .marea{font-size:22px;font-weight:700;fill:#F4F8F2;stroke:none;letter-spacing:.06em}
+
+.mapgap{display:flex;align-items:center;gap:10px;padding:9px 0 10px}
+.mapgap i{flex:1;height:0;border-top:2px dashed #C0AE84}
+.mapgap span{font-size:12px;color:var(--gold);white-space:nowrap}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font-family:inherit;font-size:11.5px;font-weight:500;padding:3px 11px;border-radius:999px;
+  background:#fff;border:1px solid var(--edge-2);color:var(--ink-2)}
+.chip.z1{border-color:#E2B3A5;color:var(--z1)}
+.chip.z2{border-color:#DCC58C;color:var(--z2)}
+.chip.z3{border-color:#A8C4CC;color:var(--z3)}
+.chip.on{color:#FFFFFF;border-color:transparent}
+.chip.z1.on{background:var(--z1)}
+.chip.z2.on{background:var(--z2)}
+.chip.z3.on{background:var(--z3)}
+
+.hero{width:100%;aspect-ratio:4/3;background:#F4EEE0;border:1.5px dashed #D2C4A5;
+  border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;color:#B3A484;overflow:hidden;margin-bottom:18px}
+.hero.has{border:1px solid var(--edge);background:var(--card)}
 .hero img{width:100%;height:100%;object-fit:cover}
-.hero svg{width:44px;height:44px}
+.hero svg{width:46px;height:46px}
+.hero span{font-size:12.5px;color:#8E8267}
 
-.banner{background:#4A1712;border:1px solid var(--thread);border-radius:3px;
-  padding:13px 15px;margin-top:18px;font-size:13.5px;line-height:1.65}
-.netbar{background:var(--moss-2);border:1px solid var(--line);border-radius:3px;
-  padding:10px 14px;margin-top:16px;font-size:12.5px;color:var(--grain)}
+.banner{background:#FBEDE7;border:1px solid #E8C9BE;border-radius:12px;
+  padding:13px 15px;margin-top:18px;font-size:13.5px;line-height:1.7;color:#7A2E16}
+.netbar{background:var(--gold-bg);border:1px solid #E5D5AE;border-radius:12px;
+  padding:10px 14px;margin-top:16px;font-size:12.5px;color:#6B4F0F}
 
-.bar{height:2px;background:var(--moss-3);margin-top:16px;overflow:hidden}
-.bar i{display:block;height:2px;width:38%;background:var(--grain);animation:sl 1.1s infinite ease-in-out}
+.bar{height:3px;background:#EFE7D5;border-radius:2px;margin-top:16px;overflow:hidden}
+.bar i{display:block;height:3px;width:38%;background:var(--act);animation:sl 1.1s infinite ease-in-out}
 @keyframes sl{0%{transform:translateX(-100%)}100%{transform:translateX(300%)}}
 @media (prefers-reduced-motion:reduce){.bar i{animation:none;width:100%}}
 </style>
@@ -132,7 +224,8 @@ var FIREBASE_CONFIG = {
 
 var DB_ROOT = "fieldguide_beone_1017";
 var EVENT_INFO = "16:30 瀑布 3 號廣場集合頒獎";
-var VERSION = "v1.1";
+var VERSION = "v1.2";
+var LOGO = "data:image/jpeg;base64,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";
 
 var ZONES = [
   { id:"museum", name:"泰雅民族博物館", sub:"深化文化脈絡" },
@@ -141,18 +234,20 @@ var ZONES = [
 ];
 
 var TASKS = [
-  { id:"m1", zone:"museum", text:"與博物館外的裝置藝術合照" },
-  { id:"m2", zone:"museum", text:"在館內找一件和山林生存有關的展品，與它合照" },
-  { id:"m3", zone:"museum", text:"在館內找一件泰雅織紋的展示，拍下你們最喜歡的一組圖案" },
-  { id:"m4", zone:"museum", text:"走上通往老街的那座橋，以溪谷為背景合照" },
-  { id:"s1", zone:"street", text:"在老街買一樣小吃，拿著它合照，畫面要看得出在老街內" },
-  { id:"s2", zone:"street", text:"找到老街的小塔，與它合照" },
-  { id:"s3", zone:"street", text:"走上攬勝大橋，在橋上與看見的景觀合照" },
-  { id:"s4", zone:"street", text:"找到老街台車站附近的壁畫，與它合照" },
-  { id:"f1", zone:"fall",   text:"在瀑布台車站外，與軌道或台車合照" },
-  { id:"f2", zone:"fall",   text:"找到勇士廣場的大型人像，與它合照" },
+  { id:"m1", zone:"museum", text:"在博物館外的裝置藝術前合照" },
+  { id:"m2", zone:"museum", text:"在館內找一幅泰雅織紋，拍下你們最喜歡的那組圖案" },
+  { id:"m3", zone:"museum", text:"在館內完成 Gaga 互動裝置的圓牌，掛上牆後與它合照" },
+  { id:"m4", zone:"museum", text:"在館內挑一件與山林生存有關的展品，和它合照" },
+
+  { id:"s1", zone:"street", text:"走上老街入口的烏來橋，紅白菱形欄杆那一座，以橋下溪谷為背景合照" },
+  { id:"s2", zone:"street", text:"在老街買一樣小吃，拿在手上合照，畫面要看得出在老街裡" },
+  { id:"s3", zone:"street", text:"走上覽勝大橋，站上透明玻璃平台，與腳下的溪谷合照" },
+  { id:"s4", zone:"street", text:"找到老街台車站旁的壁畫，和它合照" },
+
+  { id:"f1", zone:"fall",   text:"在瀑布台車站外，與台車或軌道合照" },
+  { id:"f2", zone:"fall",   text:"找到勇士廣場的大型人像，和它合照" },
   { id:"f3", zone:"fall",   text:"掃描勇士廣場的導覽 QR，拍下它介紹的那個景物" },
-  { id:"f4", zone:"fall",   text:"在勇士廣場對面停車場的裝置前拍照，瀑布要入鏡" }
+  { id:"f4", zone:"fall",   text:"在勇士廣場與烏來瀑布合影" }
 ];
 
 /* 兩階段獎勵。name 先留空，確定品項後填進去即可。 */
@@ -161,6 +256,53 @@ var PRIZES = [
   { at:12, name:"" }
 ];
 
+/* ══ 探索路線地圖 ══
+   座標單位是公尺，原點 24.8570N 121.5516E，x 東為正、y 南為正。
+   底圖路網與河道取自 OpenStreetMap，真實比例。
+   要移動某個點，改它的 x / y 就好。 */
+
+var MAP_A = { box:"-300 -890 560 490", title:"老街區" };
+var MAP_B = { box:"-230 835 560 295", title:"瀑布區" };
+
+/* 有任務的站；z 是區域色（1 博物館 2 老街 3 瀑布），side 是文字放左還右 */
+var MAP_PINS = [
+  { p:"A", x:19,  y:-821, z:2, side:"r", label:"烏來橋",        t:["s1"] },
+  { p:"A", x:-11, y:-795, z:1, side:"l", label:"泰雅民族博物館", t:["m1","m2","m3","m4"] },
+  { p:"A", x:-13, y:-628, z:2, side:"l", label:"香腸・麻糬",     t:["s2"] },
+  { p:"A", x:-15, y:-550, z:2, side:"r", label:"覽勝大橋",      t:["s3"] },
+  { p:"A", x:-47, y:-429, z:2, side:"r", label:"烏來台車站",    t:["s4"] },
+  { p:"B", x:18,  y:871,  z:3, side:"r", label:"瀑布台車站",    t:["f1"] },
+  { p:"B", x:-25, y:1010, z:3, side:"l", label:"勇士廣場",      t:["f2","f3","f4"], note:"16:30 在這集合" }
+];
+
+/* 沒有任務、但要標出來的地點 */
+var MAP_DOTS = [
+  { p:"B", x:11,  y:940,   side:"l", label:"林業生活館" },
+  { p:"B", x:77,  y:1048,  side:"r", label:"烏來瀑布" }
+];
+
+/* 走的路線 */
+var MAP_ROUTE_A = "M-14,-890 L31,-849 L25,-833 L13,-808 L6,-794 L-8,-771"
+  + " L-20,-733 L-11,-598 L5,-580 L17,-565 L-42,-528 L-50,-522 L-13,-495 L-1,-471 L-47,-429";
+var MAP_ROUTE_B = "M24,826 L16,854 L18,871 L22,899 L-4,955 L-25,1010";
+
+/* 底圖：河道 */
+var MAP_RIVER_A = [
+  "M-107,-1119 L-94,-995 L-101,-797 L-117,-723 L-112,-676 L-45,-556 L45,-467 L63,-418 L58,-353",
+  "M315,-716 L299,-742 L271,-770 L240,-786 L206,-794 L149,-784 L83,-790 L-34,-841 L-76,-872 L-95,-893"
+];
+var MAP_RIVER_B = ["M106,794 L87,930 L43,1022 L-11,1102 L-56,1138 L-122,1168"];
+
+/* 底圖：一般道路 */
+var MAP_ROAD_A = [
+  "M6,-794 L134,-750 L236,-750 L280,-709 L296,-685 L298,-660 L291,-618 L298,-562 L314,-510",
+  "M-50,-522 L-13,-495 L-1,-471 L-7,-370"
+];
+var MAP_ROAD_B = ["M22,899 L-48,1050 L-64,1090 L-87,1110 L-148,1105", "M-4,955 L60,1000 L77,1040"];
+
+/* 底圖：台車軌道 */
+var MAP_RAIL_A = "M-40,-467 L-37,-364 L-46,-340 L-77,-301 L-79,-287 L-41,-166 L-42,-115 L-55,-82 L-55,-64 L-13,50 L-20,148 L-38,208 L-36,247 L-54,303 L-55,327 L-12,380";
+var MAP_RAIL_B = "M-12,700 L69,495";
 /* ══════════════ 以下不需要修改 ══════════════ */
 
 var LS_FID = "fg_fid", LS_LOCAL = "fg_local_v2", LS_QUEUE = "fg_queue_v2", LS_IGNORE = "fg_ignore_inapp";
@@ -232,6 +374,10 @@ function go(p,a){ view.page=p; view.zone=(a&&a.zone)||null; view.task=(a&&a.task
 function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
 var ICON_CAM  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8.5h3.2l1.3-2h8l1.3 2H20v11H3z"/><circle cx="11.5" cy="13.5" r="3.4"/></svg>';
 var ICON_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg>';
+var ICON_CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>';
+var ICON_ROUTE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'
+  + '<circle cx="6" cy="6" r="2.6"/><circle cx="18" cy="18" r="2.6"/>'
+  + '<path d="M6 8.8v3.2a4 4 0 0 0 4 4h4.4" stroke-dasharray="2.4 2.6"/></svg>';
 
 function isAndroid(){ return /Android/i.test(navigator.userAgent || ""); }
 function siteUrl(){ return location.origin + location.pathname; }
@@ -241,10 +387,10 @@ function pageBlock(){
   var android = isAndroid()
     ? '<button class="btn" id="openchrome">用 Chrome 開啟</button>'
     : '';
-  return '<div class="topbar"></div>'
-    + '<p class="eyebrow">WULAI FIELD GUIDE</p>'
+  return brandRow()
+    + '<p class="eyebrow">Wulai Field Guide</p>'
     + '<h1 class="title">請換個瀏覽器開啟</h1>'
-    + '<div class="weave" style="margin:20px 0 22px"></div>'
+    + '<div class="weave gap"></div>'
     + '<p style="font-size:15px;line-height:1.8">你現在是從通訊軟體內建的瀏覽器開啟，'
     + '這裡<b>叫不出相機</b>，而且進度可能存不住。</p>'
     + '<p class="note" style="margin-top:14px;font-size:13.5px;line-height:1.8">'
@@ -507,10 +653,16 @@ function render(){
   var el = document.getElementById("app");
   if(inAppBrowser() && !ignoreInApp){ el.innerHTML = pageBlock(); bindBlock(); return; }
   if(!local.name){ el.innerHTML = pageEnter(); bindEnter(); return; }
-  if(view.page === "zone")      el.innerHTML = pageZone();
+  if(view.page === "map")       el.innerHTML = pageMap();
+  else if(view.page === "zone") el.innerHTML = pageZone();
   else if(view.page === "task") el.innerHTML = pageTask();
   else                          el.innerHTML = pageHome();
   bind();
+}
+
+function brandRow(){
+  return '<div class="brand"><span class="chip"><img src="' + LOGO + '" alt="BeOne"></span>'
+    + '<span>BeOne Family Day 2026</span></div>';
 }
 
 function banner(){
@@ -528,11 +680,11 @@ function netbar(){
 }
 
 function pageEnter(){
-  return '<div class="topbar"></div>'
-    + '<p class="eyebrow">WULAI FIELD GUIDE</p>'
+  return brandRow()
+    + '<p class="eyebrow">Wulai Field Guide</p>'
     + '<h1 class="title">百濟探索圖鑑</h1>'
-    + '<p class="sub">烏來・山林文化探索　2026.10.17</p>'
-    + '<div class="weave" style="margin:22px 0 26px"></div>'
+    + '<p class="sub">烏來原鄉山林　10 / 17（六）</p>'
+    + '<div class="weave gap"></div>'
     + '<p style="font-size:15px;margin-bottom:14px">先留下名字與部門，圖鑑會記在這支手機上。</p>'
     + '<input type="text" id="nm" placeholder="例如：王家、陳小明" maxlength="12" autocomplete="off">'
     + '<input type="text" id="dp" placeholder="部門，例如：研發部" maxlength="14" autocomplete="off" style="margin-top:10px">'
@@ -557,56 +709,194 @@ function bindEnter(){
 
 function pageHome(){
   var n = approvedCount();
+
   var tally = TASKS.map(function(x,i){
-    var on = statusOf(x.id) === "approved" ? " on" : "";
-    var tier = (i === 7 || i === 11) ? " tier" : "";
-    return '<i class="' + on + tier + '"></i>';
+    var cls = statusOf(x.id) === "approved" ? "on" : ((i === 7 || i === 11) ? "tier" : "");
+    return '<i class="' + cls + '"></i>';
   }).join("");
+  var legend = "";
+  for(var li = 0; li < 12; li++){
+    legend += '<span>' + (li === 7 ? "8" : li === 11 ? "12" : "") + '</span>';
+  }
 
-  var zones = ZONES.map(function(z){
-    var c = zoneCount(z.id);
+  var zones = ZONES.map(function(z, zi){
+    var c = zoneCount(z.id), pips = "";
+    TASKS.forEach(function(t){
+      if(t.zone === z.id) pips += '<i class="' + (statusOf(t.id) === "approved" ? "on" : "") + '"></i>';
+    });
     return '<button class="card" data-zone="' + z.id + '">'
-      + '<div class="card-row"><div>'
-      + '<div class="card-name">' + z.name + '</div>'
-      + '<div class="card-sub">' + z.sub + '</div></div>'
-      + '<div class="count' + (c ? "" : " zero") + '">' + c + ' / 4</div></div></button>';
+      + '<span class="zmark z' + (zi + 1) + '"></span>'
+      + '<span class="card-main"><span class="card-name">' + z.name + '</span>'
+      + '<span class="card-sub">' + z.sub + '</span></span>'
+      + '<span class="card-end"><span class="count' + (c ? "" : " zero") + '">' + c + ' / 4</span>'
+      + '<span class="pips">' + pips + '</span></span></button>';
   }).join("");
 
-  var prizes = PRIZES.map(function(p,i){
+  var prizes = PRIZES.map(function(p, i){
     var got = n >= p.at;
     var claimed = !!remote.claimed["t" + p.at];
-    var label = p.name || ("第 " + (i+1) + " 階段獎勵");
-    return '<div class="prize' + (got ? "" : " locked") + '"><b>' + p.at + '</b><span>' + esc(label)
-      + '<em>' + (claimed ? "已領取" : got ? "可領取，請找工作人員" : "完成 " + p.at + " 張後解鎖") + '</em></span></div>';
+    var label = p.name || ("第 " + (i + 1) + " 階段獎勵");
+    var note = claimed ? "已領取" : got ? "可領取，請找工作人員" : "還差 " + (p.at - n) + " 張解鎖";
+    return '<div class="prize' + (got ? "" : " locked") + '">'
+      + '<span class="pmark"><b>' + p.at + '</b></span>'
+      + '<span class="prize-main"><span class="prize-name">' + esc(label) + '</span>'
+      + '<span class="prize-note">' + note + '</span></span></div>';
   }).join("");
 
-  return '<div class="topbar"></div>'
-    + '<p class="eyebrow">WULAI FIELD GUIDE</p>'
+  return brandRow()
+    + '<p class="eyebrow">Wulai Field Guide</p>'
     + '<h1 class="title">百濟探索圖鑑</h1>'
-    + '<p class="sub">' + esc(local.name) + (local.dept ? '・' + esc(local.dept) : '') + '　已通過 ' + n + ' / 12</p>'
-    + '<div class="tally">' + tally + '</div>'
-    + '<div class="tally-legend"><span></span><span>8</span><span>12</span></div>'
+    + '<p class="sub">烏來原鄉山林　10 / 17（六）</p>'
+    + '<div class="prog"><div class="prog-head"><b>' + esc(local.name) + '</b>'
+    +   (local.dept ? '<em>' + esc(local.dept) + '</em>' : '')
+    +   '<span class="n">已通過 ' + n + ' / 12</span></div>'
+    +   '<div class="tally">' + tally + '</div>'
+    +   '<div class="tally-legend">' + legend + '</div></div>'
+    + '<button class="card route-link" data-map="1">'
+    +   '<span class="mapicon">' + ICON_ROUTE + '</span>'
+    +   '<span class="card-main"><span class="card-name">探索路線</span>'
+    +   '<span class="card-sub">從烏來橋走到瀑布，看看下一站在哪</span></span>'
+    +   '<span class="chev">' + ICON_CHEV + '</span></button>'
     + netbar()
-    + '<h2 style="font-size:17px;margin:30px 0 12px">三個區域</h2>' + zones
-    + '<h2 style="font-size:17px;margin:30px 0 4px">獎勵</h2>' + prizes
+    + '<h2 class="sect">三個區域</h2>' + zones
+    + '<h2 class="sect">獎勵</h2>' + prizes
     + (inAppBrowser() ? banner() : "")
     + '<div class="foot"><span>' + EVENT_INFO + '</span><button id="reset">重設</button></div>';
 }
 
+var MAP_ZC = { 1:"#C4482A", 2:"#8F6212", 3:"#2A6070" };
+
+function mapPaths(list, cls){
+  return list.map(function(d){ return '<path class="' + cls + '" d="' + d + '"/>'; }).join("");
+}
+
+function mapPin(m){
+  var tot = (m.t || []).length, done = 0;
+  (m.t || []).forEach(function(id){ if(statusOf(id) === "approved") done++; });
+  var full = tot > 0 && done === tot;
+  var col = MAP_ZC[m.z];
+  var ax = m.side === "l" ? m.x - 20 : m.x + 20;
+  var an = m.side === "l" ? "end" : "start";
+  var sub = m.note || "";
+  return '<g><rect x="' + (m.x - 11) + '" y="' + (m.y - 11) + '" width="22" height="22" rx="3"'
+    + ' transform="rotate(45 ' + m.x + ' ' + m.y + ')"'
+    + ' fill="' + (full ? col : "#FFFFFF") + '" stroke="' + col + '" stroke-width="4"/>'
+    + '<text x="' + ax + '" y="' + (m.y + (sub ? -3 : 8)) + '" text-anchor="' + an + '" class="mlab">' + m.label + '</text>'
+    + (sub ? '<text x="' + ax + '" y="' + (m.y + 19) + '" text-anchor="' + an + '" class="msub">' + sub + '</text>' : "")
+    + '</g>';
+}
+
+function mapDot(m){
+  var ax = m.side === "l" ? m.x - 15 : m.x + 15;
+  var an = m.side === "l" ? "end" : "start";
+  return '<g><circle cx="' + m.x + '" cy="' + m.y + '" r="7" fill="#FFFFFF" stroke="#A89A7C" stroke-width="3.5"/>'
+    + '<text x="' + ax + '" y="' + (m.y + 6) + '" text-anchor="' + an + '" class="mdot">' + m.label + '</text></g>';
+}
+
+function mapArea(x, y, txt){
+  var w = txt.length * 23 + 26;
+  return '<g><rect x="' + x + '" y="' + y + '" width="' + w + '" height="36" rx="18" fill="#1D4A33"/>'
+    + '<text x="' + (x + w / 2) + '" y="' + (y + 25) + '" text-anchor="middle" class="marea">' + txt + '</text></g>';
+}
+
+function mapNorth(x, y){
+  var d = "M" + x + "," + y
+        + " L" + (x + 5) + "," + (y - 13)
+        + " L" + (x + 10) + "," + y
+        + " L" + (x + 5) + "," + (y - 4) + " Z";
+  return '<g class="mnorth"><path d="' + d + '"/>'
+    + '<text x="' + (x + 5) + '" y="' + (y + 15) + '" text-anchor="middle" class="mnote">北</text></g>';
+}
+
+function mapLabel(x, y, an, txt){
+  var cls = /溪$/.test(txt) ? "mwater" : "mnote";
+  return '<text x="' + x + '" y="' + y + '" text-anchor="' + an + '" class="' + cls + '">' + txt + '</text>';
+}
+
+function mapScale(x, y){
+  return '<g class="mscale"><path d="M' + x + ',' + y + ' L' + (x + 100) + ',' + y + '"/>'
+    + '<path d="M' + x + ',' + (y - 5) + ' L' + x + ',' + (y + 5) + '"/>'
+    + '<path d="M' + (x + 100) + ',' + (y - 5) + ' L' + (x + 100) + ',' + (y + 5) + '"/>'
+    + '<text x="' + (x + 50) + '" y="' + (y - 10) + '" text-anchor="middle" class="mnote">100 公尺</text></g>';
+}
+
+function mapPanel(cfg, key, rivers, roads, rail, route, scaleX, scaleY){
+  var pins = MAP_PINS.filter(function(m){ return m.p === key; }).map(mapPin).join("");
+  var dots = MAP_DOTS.filter(function(m){ return m.p === key; }).map(mapDot).join("");
+  return '<svg class="mapsvg" viewBox="' + cfg.box + '" role="img" aria-label="' + cfg.title + '路線圖">'
+    + '<g class="mriver">' + mapPaths(rivers, "") + '</g>'
+    + '<g class="mroad">' + mapPaths(roads, "") + '</g>'
+    + '<path class="mrail" d="' + rail + '"/>'
+    + '<path class="mroute-case" d="' + route + '"/>'
+    + '<path class="mroute" d="' + route + '"/>'
+    + (key === "A"
+        ? mapLabel(-124, -648, "end", "南勢溪") + mapLabel(108, -798, "start", "桶後溪")
+          + mapNorth(228, -862) + mapLabel(38, -866, "start", "往公車總站・停車場")
+          + mapArea(-286, -880, "老街區")
+        : mapLabel(112, 928, "start", "南勢溪") + mapNorth(288, 872)
+          + mapArea(-216, 845, "瀑布區"))
+    + dots + pins
+    + mapScale(scaleX, scaleY)
+    + '</svg>';
+}
+
+function mapChips(key){
+  var out = "";
+  MAP_PINS.filter(function(m){ return !key || m.p === key; }).forEach(function(m){
+    (m.t || []).forEach(function(id){
+      var t = null;
+      TASKS.forEach(function(a){ if(a.id === id) t = a; });
+      if(!t) return;
+      var done = statusOf(id) === "approved";
+      out += '<button class="chip z' + m.z + (done ? " on" : "") + '" data-jump="' + id
+        + '" data-jz="' + t.zone + '">' + (MAP_SHORT[id] || id) + '</button>';
+    });
+  });
+  return '<div class="chips">' + out + '</div>';
+}
+
+var MAP_SHORT = {
+  m1:"館外裝置", m2:"織紋", m3:"Gaga 圓牌", m4:"山林展品",
+  s1:"橋上合照", s2:"小吃", s3:"玻璃平台", s4:"壁畫",
+  f1:"台車軌道", f2:"勇士像", f3:"導覽 QR", f4:"瀑布合影"
+};
+
+function pageMap(){
+  return '<div class="topbar"><button class="back" id="bk">' + ICON_BACK + '返回總覽</button></div>'
+    + '<h1 class="title" style="font-size:25px;margin-top:0">探索路線</h1>'
+    + '<p class="sub">從烏來橋進老街，走到瀑布，全程約 2 公里</p>'
+    + '<div class="weave" style="margin-top:10px;margin-bottom:12px"></div>'
+    + mapPanel(MAP_A, "A", MAP_RIVER_A, MAP_ROAD_A, MAP_RAIL_A, MAP_ROUTE_A, -282, -418)
+    + '<div class="mapgap"><i></i><span>烏來台車　1.3 公里　約 10 分鐘</span><i></i></div>'
+    + mapPanel(MAP_B, "B", MAP_RIVER_B, MAP_ROAD_B, MAP_RAIL_B, MAP_ROUTE_B, -212, 1108)
+    + '<h2 class="sect" style="margin:18px 0 8px">十二張任務</h2>'
+    + mapChips(null)
+    + '<p class="note">底圖依實際座標繪製，兩張圖同一比例。點任務標籤可直接跳到那一張卡。</p>';
+}
 function pageZone(){
   var z = ZONES.filter(function(x){ return x.id === view.zone; })[0];
+  var zi = 1;
+  ZONES.forEach(function(a, k){ if(a.id === z.id) zi = k + 1; });
+
+  var pips = "";
+  TASKS.forEach(function(t){
+    if(t.zone === z.id) pips += '<i class="' + (statusOf(t.id) === "approved" ? "on" : "") + '"></i>';
+  });
+
   var rows = TASKS.filter(function(x){ return x.zone === z.id; }).map(function(x){
     var st = statusOf(x.id), th = local.thumbs[x.id];
-    return '<button class="task" data-task="' + x.id + '">'
-      + '<div class="thumb">' + (th ? '<img src="' + th + '" alt="">' : ICON_CAM) + '</div>'
-      + '<div><div class="task-text">' + x.text + '</div>' + tagOf(st) + '</div></button>';
+    return '<button class="task' + (st === "rejected" ? " rej" : "") + '" data-task="' + x.id + '">'
+      + '<span class="thumb' + (th ? " has" : "") + '">' + (th ? '<img src="' + th + '" alt="">' : ICON_CAM) + '</span>'
+      + '<span class="task-body"><span class="task-text">' + x.text + '</span>' + tagOf(st) + '</span></button>';
   }).join("");
 
   return '<div class="topbar"><button class="back" id="bk">' + ICON_BACK + '返回總覽</button></div>'
-    + '<p class="eyebrow">' + z.sub + '</p>'
-    + '<h1 class="title">' + z.name + '</h1>'
-    + '<p class="sub">已通過 ' + zoneCount(z.id) + ' / 4</p>'
-    + '<div class="weave" style="margin:18px 0 4px"></div>' + rows;
+    + '<div class="zhead"><span class="zmark z' + zi + '"></span>'
+    +   '<span class="zhead-main"><h1 class="title">' + z.name + '</h1>'
+    +   '<span class="zsub z' + zi + '">' + z.sub + '</span></span>'
+    +   '<span class="card-end"><span class="count">' + zoneCount(z.id) + ' / 4</span>'
+    +   '<span class="pips">' + pips + '</span></span></div>'
+    + '<div class="weave z' + zi + '" style="margin-top:18px;margin-bottom:16px"></div>' + rows;
 }
 
 function tagOf(s){
@@ -651,22 +941,34 @@ function pageTask(){
         + '<button class="btn ghost" data-shoot="lib">從相簿選照片</button>';
   }
 
+  var zi = 1;
+  ZONES.forEach(function(a, k){ if(a.id === z.id) zi = k + 1; });
+
   return '<div class="topbar"><button class="back" id="bk">' + ICON_BACK + z.name + '</button></div>'
-    + '<div class="hero">' + (th ? '<img src="' + th + '" alt="">' : ICON_CAM) + '</div>'
-    + '<h1 style="font-size:19px;line-height:1.55">' + x.text + '</h1>'
-    + tagOf(st)
-    + '<p class="note" style="margin-top:12px">' + msg + '</p>' + btn;
+    + '<div class="hero' + (th ? " has" : "") + '">'
+    +   (th ? '<img src="' + th + '" alt="">' : ICON_CAM + '<span>還沒有照片</span>') + '</div>'
+    + '<div class="tagrow"><span class="tag t-zone z' + zi + '">' + z.name + '</span>' + tagOf(st) + '</div>'
+    + '<h1 class="tasktitle">' + x.text + '</h1>'
+    + '<p class="note">' + msg + '</p>' + btn;
 }
 
 function bind(){
   var bk = document.getElementById("bk");
   if(bk) bk.onclick = function(){ view.page === "task" ? go("zone",{zone:view.zone}) : go("home"); };
 
+  var mp = document.querySelector("[data-map]");
+  if(mp) mp.onclick = function(){ go("map"); };
+
   Array.prototype.forEach.call(document.querySelectorAll("[data-zone]"), function(b){
     b.onclick = function(){ go("zone", { zone:b.getAttribute("data-zone") }); };
   });
   Array.prototype.forEach.call(document.querySelectorAll("[data-task]"), function(b){
     b.onclick = function(){ go("task", { zone:view.zone, task:b.getAttribute("data-task") }); };
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-jump]"), function(b){
+    b.onclick = function(){
+      go("task", { zone:b.getAttribute("data-jz"), task:b.getAttribute("data-jump") });
+    };
   });
   Array.prototype.forEach.call(document.querySelectorAll("[data-shoot]"), function(b){
     b.onclick = function(){ shoot(view.task, b.getAttribute("data-shoot")); };
