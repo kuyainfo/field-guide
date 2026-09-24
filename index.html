@@ -161,17 +161,8 @@ input[type=text]::placeholder{color:#B3A484}
 .mapsvg .mnorth path{fill:#A89A7C;stroke:none}
 .mapsvg .mwater{font-size:18px;font-weight:500;fill:#6E93A0;letter-spacing:.1em}
 .mapsvg .marea{font-size:22px;font-weight:700;fill:#F4F8F2;stroke:none;letter-spacing:.06em}
-.mapsvg .mvou{font-size:15px;font-weight:700;fill:#FFF8EC;stroke:none}
+.mapsvg .mtag{font-size:17px;font-weight:500;fill:#6B4F0F;stroke:none}
 
-.vlist{display:flex;flex-direction:column;gap:8px}
-.vrow{display:flex;gap:12px;align-items:flex-start;background:var(--card);
-  border:1px solid var(--edge);border-radius:12px;padding:11px 14px}
-.vmark{width:26px;height:26px;flex:none;border-radius:50%;background:#B8891F;color:#FFF8EC;
-  font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
-.vbody{flex:1 1 auto;min-width:0}
-.vname{display:block;font-size:14.5px;font-weight:700;color:var(--ink)}
-.vname em{font-style:normal;font-weight:400;font-size:12px;color:var(--ink-3);margin-left:8px}
-.vnote{display:block;font-size:12.5px;color:var(--ink-2);line-height:1.6}
 
 .mapgap{display:flex;align-items:center;gap:10px;padding:9px 0 10px}
 .mapgap i{flex:1;height:0;border-top:2px dashed #C0AE84}
@@ -271,7 +262,7 @@ var PRIZES = [
    底圖路網與河道取自 OpenStreetMap，真實比例。
    要移動某個點，改它的 x / y 就好。 */
 
-var MAP_A = { box:"-300 -890 560 490", title:"老街區" };
+var MAP_A = { box:"-300 -890 560 505", title:"老街區" };
 var MAP_B = { box:"-230 835 560 295", title:"瀑布區" };
 
 /* 有任務的站；z 是區域色（1 博物館 2 老街 3 瀑布），side 是文字放左還右 */
@@ -279,20 +270,14 @@ var MAP_B = { box:"-230 835 560 295", title:"瀑布區" };
 var MAP_PINS = [
   { p:"A", x:19,  y:-821, z:2, side:"r", label:"烏來橋",        t:["s1"] },
   { p:"A", x:-11, y:-795, z:1, side:"l", label:"泰雅民族博物館", t:["m1","m2","m3","m4"] },
-  { p:"A", x:-9,  y:-748, z:2, side:"l", label:"香腸・麻糬",     t:["s2"], v:1 },
+  { p:"A", x:-9,  y:-748, z:2, side:"l", label:"香腸・麻糬",     t:["s2"], v:1, note:"小吃兌換券" },
   { p:"A", x:-15, y:-550, z:2, side:"r", label:"覽勝大橋",      t:["s3"] },
-  { p:"A", x:-45, y:-436, z:2, side:"r", label:"烏來台車站",    t:["s4"], v:1 },
+  { p:"A", x:-45, y:-436, z:2, side:"r", label:"烏來台車站",    t:["s4"], v:1, note:"台車門票，每人一次" },
   { p:"B", x:18,  y:871,  z:3, side:"r", label:"瀑布台車站",    t:["f1"] },
-  { p:"B", x:-2,  y:973,  z:3, side:"l", label:"瀑布三號",      t:[], v:1 },
-  { p:"B", x:-48, y:1035, z:3, side:"l", label:"勇士廣場",      t:["f2","f3","f4"], note:"16:30 在這集合" }
+  { p:"B", x:-2,  y:985,  z:3, side:"r", label:"瀑布三號",      t:[], v:1, note:"200 元現金兌換券" },
+  { p:"B", x:-28, y:1015, z:3, side:"l", label:"勇士廣場",      t:["f2","f3","f4"], note:"16:30 在這集合" }
 ];
 
-/* 圖下方的兌換點說明 */
-var VOUCHERS = [
-  { name:"香腸・麻糬",   addr:"烏來街 99 號",   text:"小吃兌換券、200 元現金兌換券" },
-  { name:"烏來台車站",   addr:"售票口",        text:"台車門票，每人一次，工作人員協助付款" },
-  { name:"瀑布三號",     addr:"瀑布路 3 號",   text:"小吃兌換券、200 元現金兌換券" }
-];
 
 /* 沒有任務、但要標出來的地點 */
 var MAP_DOTS = [
@@ -302,7 +287,7 @@ var MAP_DOTS = [
 /* 走的路線 */
 var MAP_ROUTE_A = "M-14,-890 L31,-849 L25,-833 L13,-808 L6,-794 L-8,-771"
   + " L-20,-733 L-11,-598 L5,-580 L17,-565 L-42,-528 L-50,-522 L-13,-495 L-1,-471 L-47,-429";
-var MAP_ROUTE_B = "M24,826 L16,854 L18,871 L22,899 L-4,955 L-25,1010 L-42,1034";
+var MAP_ROUTE_B = "M24,826 L16,854 L18,871 L22,899 L-4,955 L-18,985 L-30,1015";
 
 /* 底圖：河道 */
 var MAP_RIVER_A = [
@@ -788,33 +773,52 @@ function mapPaths(list, cls){
   return list.map(function(d){ return '<path class="' + cls + '" d="' + d + '"/>'; }).join("");
 }
 
+/* 文字寬度估算，用來畫金色標籤的底 */
+function mapTextW(txt, fs){
+  var w = 0;
+  for(var i = 0; i < txt.length; i++){
+    var c = txt.charCodeAt(i);
+    w += c > 255 ? fs : (c === 32 ? fs * 0.3 : fs * 0.56);
+  }
+  return w;
+}
+
 function mapPin(m){
   var tot = (m.t || []).length, done = 0;
   (m.t || []).forEach(function(id){ if(statusOf(id) === "approved") done++; });
   var full = tot > 0 && done === tot;
   var col = MAP_ZC[m.z];
-  var ax = m.side === "l" ? m.x - 20 : m.x + 20;
+  var gap = tot ? 28 : 22;
+  var ax = m.side === "l" ? m.x - gap : m.x + gap;
   var an = m.side === "l" ? "end" : "start";
   var sub = m.note || "";
+
+  /* 有任務的用菱形（填滿＝這點都通過了），沒任務的用空心圓點 */
   var mark = tot
     ? '<rect x="' + (m.x - 11) + '" y="' + (m.y - 11) + '" width="22" height="22" rx="3"'
       + ' transform="rotate(45 ' + m.x + ' ' + m.y + ')"'
-      + ' fill="' + (full ? col : "#FFFFFF") + '" stroke="' + col + '" stroke-width="4"/>'
-    : "";
+      + ' fill="#FFFFFF" stroke="' + col + '" stroke-width="4"/>'
+      + (full ? '<rect x="' + (m.x - 7) + '" y="' + (m.y - 7) + '" width="14" height="14" rx="2"'
+        + ' transform="rotate(45 ' + m.x + ' ' + m.y + ')" fill="' + col + '"/>' : "")
+    : '<circle cx="' + m.x + '" cy="' + m.y + '" r="7" fill="#FFFFFF" stroke="#A89A7C" stroke-width="3.5"/>';
 
-  var vou = "";
-  if(m.v){
-    var vx = tot ? (m.side === "l" ? m.x + 16 : m.x - 16) : m.x;
-    var vy = tot ? m.y - 14 : m.y;
-    var vr = tot ? 10 : 13;
-    vou = '<circle cx="' + vx + '" cy="' + vy + '" r="' + vr + '" fill="#B8891F" stroke="#F3EDDF" stroke-width="3"/>'
-      + '<text x="' + vx + '" y="' + (vy + (tot ? 5 : 6)) + '" text-anchor="middle" class="mvou">券</text>';
+  var out = '<g>' + mark
+    + '<text x="' + ax + '" y="' + (m.y + (sub ? -4 : 8)) + '" text-anchor="' + an + '" class="mlab">' + m.label + '</text>';
+
+  if(sub){
+    var ny = m.y + 21;
+    if(m.v){
+      var w = mapTextW(sub, 17) + 24;
+      var tx = m.side === "l" ? ax - 12 : ax + 12;
+      var rx = m.side === "l" ? ax - w : ax;
+      out += '<rect x="' + rx + '" y="' + (ny - 19) + '" width="' + w + '" height="26" rx="13"'
+        + ' fill="#F5E7C3" stroke="#D9BE7C" stroke-width="1.5"/>'
+        + '<text x="' + tx + '" y="' + ny + '" text-anchor="' + an + '" class="mtag">' + sub + '</text>';
+    } else {
+      out += '<text x="' + ax + '" y="' + ny + '" text-anchor="' + an + '" class="msub">' + sub + '</text>';
+    }
   }
-
-  return '<g>' + mark + vou
-    + '<text x="' + ax + '" y="' + (m.y + (sub ? -3 : 8)) + '" text-anchor="' + an + '" class="mlab">' + m.label + '</text>'
-    + (sub ? '<text x="' + ax + '" y="' + (m.y + 19) + '" text-anchor="' + an + '" class="msub">' + sub + '</text>' : "")
-    + '</g>';
+  return out + '</g>';
 }
 
 function mapDot(m){
@@ -871,16 +875,6 @@ function mapPanel(cfg, key, rivers, roads, rail, route, scaleX, scaleY){
     + '</svg>';
 }
 
-function mapVouchers(){
-  var rows = VOUCHERS.map(function(v){
-    return '<div class="vrow"><span class="vmark">券</span>'
-      + '<span class="vbody"><span class="vname">' + v.name
-      +   '<em>' + v.addr + '</em></span>'
-      +   '<span class="vnote">' + v.text + '</span></span></div>';
-  }).join("");
-  return '<h2 class="sect" style="margin:18px 0 8px">兌換點</h2><div class="vlist">' + rows + '</div>';
-}
-
 function mapChips(){
   var out = "";
   TASKS.forEach(function(t){
@@ -904,13 +898,12 @@ function pageMap(){
     + '<h1 class="title" style="font-size:25px;margin-top:0">探索路線</h1>'
     + '<p class="sub">從烏來橋進老街，走到瀑布，全程約 2 公里</p>'
     + '<div class="weave" style="margin-top:10px;margin-bottom:12px"></div>'
-    + mapPanel(MAP_A, "A", MAP_RIVER_A, MAP_ROAD_A, MAP_RAIL_A, MAP_ROUTE_A, -282, -418)
+    + mapPanel(MAP_A, "A", MAP_RIVER_A, MAP_ROAD_A, MAP_RAIL_A, MAP_ROUTE_A, -282, -408)
     + '<div class="mapgap"><i></i><span>烏來台車　1.3 公里　約 10 分鐘</span><i></i></div>'
     + mapPanel(MAP_B, "B", MAP_RIVER_B, MAP_ROAD_B, MAP_RAIL_B, MAP_ROUTE_B, -212, 1108)
-    + mapVouchers()
     + '<h2 class="sect" style="margin:18px 0 8px">十二張任務</h2>'
     + mapChips()
-    + '<p class="note">底圖依實際座標繪製，兩張圖同一比例。點任務標籤可直接跳到那一張卡。</p>';
+    + '<p class="note">底圖依實際座標繪製，兩張圖同一比例。金色標籤的地方可以兌換，點任務標籤可直接跳到那一張卡。</p>';
 }
 function pageZone(){
   var z = ZONES.filter(function(x){ return x.id === view.zone; })[0];
