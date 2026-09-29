@@ -196,6 +196,27 @@ input[type=text]::placeholder{color:#B3A484}
 .bar i{display:block;height:3px;width:38%;background:var(--act);animation:sl 1.1s infinite ease-in-out}
 @keyframes sl{0%{transform:translateX(-100%)}100%{transform:translateX(300%)}}
 @media (prefers-reduced-motion:reduce){.bar i{animation:none;width:100%}}
+
+/* 出發之前（玩法說明） */
+.story{background:#F3EDDF;border:1px solid var(--edge);border-left:4px solid var(--act);border-radius:12px;padding:14px 16px;margin-top:14px}
+.story p{margin:0 0 9px;font-size:14px;line-height:1.95;color:#2C3B2F}
+.story p:last-child{margin-bottom:0}
+.story b{color:var(--ink);font-weight:700}
+.rules{display:flex;flex-direction:column;gap:9px}
+.rule{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--edge);border-radius:14px;padding:13px 14px}
+.rule-i{width:34px;height:34px;flex:none;border-radius:9px;background:#F5EFE2;display:flex;align-items:center;justify-content:center}
+.rule-i svg{width:19px;height:19px}
+.rule-b{flex:1 1 auto;min-width:0}
+.rule-t{display:block;font-size:14.5px;font-weight:700;color:var(--ink);letter-spacing:.02em}
+.rule-d{display:block;font-size:13px;line-height:1.75;color:var(--ink-2);margin-top:3px}
+.sign{text-align:center;font-size:12.5px;color:var(--ink-3);margin-top:12px;letter-spacing:.04em}
+
+/* 總覽頁的一段說明 */
+.intro{background:var(--card);border:1px solid var(--edge);border-radius:16px;padding:14px 16px;margin-top:14px}
+.intro p{margin:0;font-size:13.5px;line-height:1.8;color:var(--ink-2)}
+.intro b{color:var(--gold);font-weight:700}
+.intro-link{display:flex;width:100%;align-items:center;justify-content:space-between;margin-top:10px;padding:11px 0 0;border:none;border-top:1px dashed var(--edge-2);background:none;font-family:inherit;font-size:13.5px;font-weight:700;color:var(--act-text)}
+.intro-link svg{width:14px;height:14px}
 </style>
 </head>
 <body>
@@ -371,7 +392,7 @@ function zoneCount(z){ return TASKS.filter(function(x){ return x.zone === z && s
 
 /* ── 導覽 ── */
 var view = { page:"home", zone:null, task:null };
-function go(p,a){ view.page=p; view.zone=(a&&a.zone)||null; view.task=(a&&a.task)||null; window.scrollTo(0,0); render(); }
+function go(p,a){ view.page=p; view.zone=(a&&a.zone)||null; view.task=(a&&a.task)||null; view.first=!!(a&&a.first); window.scrollTo(0,0); render(); }
 
 /* ── 工具 ── */
 function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
@@ -656,7 +677,8 @@ function render(){
   var el = document.getElementById("app");
   if(inAppBrowser() && !ignoreInApp){ el.innerHTML = pageBlock(); bindBlock(); return; }
   if(!local.name){ el.innerHTML = pageEnter(); bindEnter(); return; }
-  if(view.page === "map")       el.innerHTML = pageMap();
+  if(view.page === "rules")     el.innerHTML = pageRules();
+  else if(view.page === "map")  el.innerHTML = pageMap();
   else if(view.page === "zone") el.innerHTML = pageZone();
   else if(view.page === "task") el.innerHTML = pageTask();
   else                          el.innerHTML = pageHome();
@@ -703,11 +725,56 @@ function bindEnter(){
     if(!v || !d){ document.getElementById("nmerr").classList.remove("hide"); return; }
     local.name = v; local.dept = d; saveLocal();
     if(fref) fref.update({ name:v, dept:d, createdAt:Date.now() });
-    go("home");
+    go("rules", { first:1 });
   };
   function clearErr(){ document.getElementById("nmerr").classList.add("hide"); }
   document.getElementById("nm").oninput = clearErr;
   document.getElementById("dp").oninput = clearErr;
+}
+
+var RULE_ICON = {
+  map:'<path d="M9 4L3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5z"/><path d="M9 4v13M15 6.5v13"/>',
+  cam:'<path d="M3 8.5h3.2l1.3-2h8l1.3 2H20v11H3z"/><circle cx="11.5" cy="13.5" r="3.4"/>',
+  chk:'<circle cx="12" cy="12" r="8.5"/><path d="M8.3 12.2l2.6 2.6 4.8-5"/>',
+  dia:'<rect x="6" y="6" width="12" height="12" rx="2" transform="rotate(45 12 12)"/>',
+  tag:'<path d="M4 4h7l9 9-7 7-9-9z"/><circle cx="8.4" cy="8.4" r="1.4"/>',
+  phn:'<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M10.6 18.6h2.8"/>'
+};
+
+/* 改文字就改這裡 */
+var RULES = [
+  { i:"map", t:"目標", d:"三個區域、十二張照片。每收進一張，圖鑑就亮起一格。" },
+  { i:"cam", t:"拍照", d:"每一題拍一張。現場拍，或從相簿裡挑一張都可以。" },
+  { i:"chk", t:"審核", d:"送出後由工作人員確認，通過才會亮格；被退回就換個角度再來一張。" },
+  { i:"dia", t:"獎勵", d:"集滿 8 格與 12 格各有一份，16:30 在勇士廣場頒發。" },
+  { i:"tag", t:"兌換", d:"探索路線圖上掛著金色標籤的地方可以補給：老街小吃、台車車票、現金券。" },
+  { i:"phn", t:"提醒", d:"進度記在這支手機裡，一組人請固定用同一支。收訊不好時照片會自己排隊補傳。" }
+];
+
+function pageRules(){
+  var first = !!view.first;
+  var rows = RULES.map(function(r){
+    return '<div class="rule"><span class="rule-i">'
+      + '<svg viewBox="0 0 24 24" fill="none" stroke="#8F6212" stroke-width="1.7"'
+      + ' stroke-linecap="round" stroke-linejoin="round">' + RULE_ICON[r.i] + '</svg></span>'
+      + '<span class="rule-b"><span class="rule-t">' + r.t + '</span>'
+      + '<span class="rule-d">' + r.d + '</span></span></div>';
+  }).join("");
+
+  return (first
+      ? brandRow()
+      : '<div class="topbar"><button class="back" id="bk">' + ICON_BACK + '返回總覽</button></div>')
+    + '<h1 class="title" style="font-size:26px;margin-top:' + (first ? "14px" : "0") + '">出發之前</h1>'
+    + '<p class="sub">烏來　十月十七日</p>'
+    + '<div class="weave gap"></div>'
+    + '<div class="story">'
+    +   '<p>烏來的山林裡，泰雅族人世代靠一雙眼睛認路——哪條溪過得去、哪一種織紋屬於哪個家族，都記在心上。</p>'
+    +   '<p>今天，這本空白的圖鑑交到你們手上。<b>從烏來橋走進老街，一路走到瀑布</b>，把沿途看見的，一格一格收進來。</p>'
+    + '</div>'
+    + '<h2 class="sect">怎麼玩</h2>'
+    + '<div class="rules">' + rows + '</div>'
+    + '<button class="btn" id="rdone">' + (first ? "準備好了，出發" : "返回總覽") + '</button>'
+    + '<p class="sign">祝你們玩得盡興　—　BeOne Family Day 2026</p>';
 }
 
 function pageHome(){
@@ -750,6 +817,8 @@ function pageHome(){
     + '<p class="eyebrow">Wulai Field Guide</p>'
     + '<h1 class="title">百濟探索圖鑑</h1>'
     + '<p class="sub">烏來原鄉山林　10 / 17（六）</p>'
+    + '<div class="intro"><p>三個區域、十二張照片。每收進一張，圖鑑就亮起一格；集滿 <b>8 格</b>與 <b>12 格</b>各有一份獎勵。</p>'
+    +   '<button class="intro-link" data-rules="1"><span>看玩法說明</span>' + ICON_CHEV + '</button></div>'
     + '<div class="prog"><div class="prog-head"><b>' + esc(local.name) + '</b>'
     +   (local.dept ? '<em>' + esc(local.dept) + '</em>' : '')
     +   '<span class="n">已通過 ' + n + ' / 12</span></div>'
@@ -990,6 +1059,12 @@ function bind(){
 
   var mp = document.querySelector("[data-map]");
   if(mp) mp.onclick = function(){ go("map"); };
+
+  var rl = document.querySelector("[data-rules]");
+  if(rl) rl.onclick = function(){ go("rules"); };
+
+  var rd = document.getElementById("rdone");
+  if(rd) rd.onclick = function(){ go("home"); };
 
   Array.prototype.forEach.call(document.querySelectorAll("[data-zone]"), function(b){
     b.onclick = function(){ go("zone", { zone:b.getAttribute("data-zone") }); };
