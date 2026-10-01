@@ -710,12 +710,12 @@ function pageEnter(){
     + '<h1 class="title">百濟探索圖鑑</h1>'
     + '<p class="sub">烏來原鄉山林　10 / 17（六）</p>'
     + '<div class="weave gap"></div>'
-    + '<p style="font-size:15px;margin-bottom:14px">先留下名字與部門，圖鑑會記在這支手機上。</p>'
-    + '<input type="text" id="nm" placeholder="例如：王家、陳小明" maxlength="12" autocomplete="off">'
+    + '<p style="font-size:15px;margin-bottom:14px">先留下報名同仁的名字與部門，圖鑑會記在這支手機上。</p>'
+    + '<input type="text" id="nm" placeholder="例如：陳小明" maxlength="12" autocomplete="off">'
     + '<input type="text" id="dp" placeholder="部門，例如：研發部" maxlength="14" autocomplete="off" style="margin-top:10px">'
     + '<p class="err hide" id="nmerr">名字與部門都要填</p>'
     + '<button class="btn" id="go">開始探索</button>'
-    + '<p class="note">全家一起玩就填家庭名，一個人玩就填自己的名字；部門是給工作人員區分同名用的。之後可以在總覽頁底下重設。</p>'
+    + '<p class="note">請填報名同仁的姓名，一個家庭用一支手機就好；部門是給工作人員區分同名用的。之後可以在總覽頁底下重設。</p>'
     + (inAppBrowser() ? banner() : "");
 }
 function bindEnter(){
@@ -733,6 +733,8 @@ function bindEnter(){
 }
 
 var RULE_ICON = {
+  fam:'<circle cx="9" cy="8" r="3.2"/><path d="M3.6 19.4c0-3.2 2.4-5.3 5.4-5.3s5.4 2.1 5.4 5.3"/>'
+    + '<path d="M16.2 7.3a3 3 0 0 1 0 5.4"/><path d="M17.8 14.7c1.9.6 3.2 2.3 3.2 4.7"/>',
   map:'<path d="M9 4L3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5z"/><path d="M9 4v13M15 6.5v13"/>',
   cam:'<path d="M3 8.5h3.2l1.3-2h8l1.3 2H20v11H3z"/><circle cx="11.5" cy="13.5" r="3.4"/>',
   chk:'<circle cx="12" cy="12" r="8.5"/><path d="M8.3 12.2l2.6 2.6 4.8-5"/>',
@@ -743,12 +745,13 @@ var RULE_ICON = {
 
 /* 改文字就改這裡 */
 var RULES = [
+  { i:"fam", t:"分組", d:"以家庭為單位，由報名的同仁代表登入，一家人共用這一本圖鑑。" },
   { i:"map", t:"目標", d:"三個區域、十二張照片。每收進一張，圖鑑就亮起一格。" },
   { i:"cam", t:"拍照", d:"每一題拍一張。現場拍，或從相簿裡挑一張都可以。" },
-  { i:"chk", t:"審核", d:"送出後由工作人員確認，通過才會亮格；被退回就換個角度再來一張。" },
+  { i:"chk", t:"審核", d:"送出後由工作人員線上確認，通過才會亮格；被退回就換個角度再來一張。" },
   { i:"dia", t:"獎勵", d:"集滿 8 格與 12 格各有一份，16:30 在勇士廣場頒發。" },
   { i:"tag", t:"兌換", d:"探索路線圖上掛著金色標籤的地方可以補給：老街小吃、台車車票、現金券。" },
-  { i:"phn", t:"提醒", d:"進度記在這支手機裡，一組人請固定用同一支。收訊不好時照片會自己排隊補傳。" }
+  { i:"phn", t:"提醒", d:"進度記在這支手機裡，全程請用同一支。收訊不好時照片會自己排隊補傳。" }
 ];
 
 function pageRules(){
