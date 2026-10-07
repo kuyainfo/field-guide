@@ -117,7 +117,8 @@ button{font-family:inherit;font-size:inherit;color:inherit;background:none;borde
 .pmark b{transform:rotate(-45deg);font-size:13px;font-weight:900;color:#6B4F0F}
 .prize-main{flex:1 1 auto;min-width:0}
 .prize-name{display:block;font-size:14.5px;font-weight:700;color:var(--ink)}
-.prize-note{display:block;font-size:11.5px;color:var(--ink-2);line-height:1.5}
+.prize-desc{display:block;font-size:12.5px;color:var(--ink-2);line-height:1.6;margin:2px 0 3px}
+.prize-note{display:block;font-size:11.5px;color:var(--ink-3);line-height:1.5}
 .prize.locked{opacity:.6}
 .prize.locked .pmark{background:#F1EADB;border-color:#C6B893}
 .prize.locked .pmark b{color:var(--ink-2)}
@@ -245,7 +246,7 @@ var FIREBASE_CONFIG = {
 };
 
 var DB_ROOT = "fieldguide_beone_1017";
-var EVENT_INFO = "16:30 瀑布 3 號廣場集合頒獎";
+var EVENT_INFO = "16:30 勇士廣場集合頒獎";
 var VERSION = "v1.2";
 var LOGO = "data:image/png;base64,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";
 
@@ -274,8 +275,8 @@ var TASKS = [
 
 /* 兩階段獎勵。name 先留空，確定品項後填進去即可。 */
 var PRIZES = [
-  { at:8,  name:"" },
-  { at:12, name:"" }
+  { at:8,  name:"完成禮",   desc:"大人手機繩，小朋友專屬禮品" },
+  { at:12, name:"全制霸禮", desc:"200 元禮券＋大獎抽獎資格，同仁名下有一人完成即可領取" }
 ];
 
 /* ══ 探索路線地圖 ══
@@ -710,12 +711,12 @@ function pageEnter(){
     + '<h1 class="title">百濟探索圖鑑</h1>'
     + '<p class="sub">烏來原鄉山林　10 / 17（六）</p>'
     + '<div class="weave gap"></div>'
-    + '<p style="font-size:15px;margin-bottom:14px">先留下報名同仁的名字與部門，圖鑑會記在這支手機上。</p>'
-    + '<input type="text" id="nm" placeholder="例如：陳小明" maxlength="12" autocomplete="off">'
+    + '<p style="font-size:15px;margin-bottom:14px">先留下名字與部門，圖鑑會記在這支手機上。</p>'
+    + '<input type="text" id="nm" placeholder="例如：陳小明、陳小明-1" maxlength="12" autocomplete="off">'
     + '<input type="text" id="dp" placeholder="部門，例如：研發部" maxlength="14" autocomplete="off" style="margin-top:10px">'
     + '<p class="err hide" id="nmerr">名字與部門都要填</p>'
     + '<button class="btn" id="go">開始探索</button>'
-    + '<p class="note">請填報名同仁的姓名，一個家庭用一支手機就好；部門是給工作人員區分同名用的。之後可以在總覽頁底下重設。</p>'
+    + '<p class="note">同仁填自己的姓名與部門；家屬填同仁姓名加編號，例如「陳小明-1」，部門與同仁相同。之後可以在總覽頁底下重設。</p>'
     + (inAppBrowser() ? banner() : "");
 }
 function bindEnter(){
@@ -745,13 +746,13 @@ var RULE_ICON = {
 
 /* 改文字就改這裡 */
 var RULES = [
-  { i:"fam", t:"分組", d:"以家庭為單位，由報名的同仁代表登入，一家人共用這一本圖鑑。" },
+  { i:"fam", t:"參加", d:"每人各自一本圖鑑。家屬用同仁姓名加編號，例如「陳小明-1」，編號自己排，部門相同。" },
   { i:"map", t:"目標", d:"三個區域、十二張照片。每收進一張，圖鑑就亮起一格。" },
-  { i:"cam", t:"拍照", d:"每一題拍一張。現場拍，或從相簿裡挑一張都可以。" },
+  { i:"cam", t:"拍照", d:"每一題都要本人入鏡，人和景一起拍才算完成。現場拍或從相簿挑都可以。" },
   { i:"chk", t:"審核", d:"送出後由工作人員線上確認，通過才會亮格；被退回就換個角度再來一張。" },
-  { i:"dia", t:"獎勵", d:"集滿 8 格與 12 格各有一份，16:30 在勇士廣場頒發。" },
-  { i:"tag", t:"兌換", d:"探索路線圖上掛著金色標籤的地方可以補給：老街小吃、台車車票、現金券。" },
-  { i:"phn", t:"提醒", d:"進度記在這支手機裡，全程請用同一支。收訊不好時照片會自己排隊補傳。" }
+  { i:"dia", t:"獎勵", d:"8 格每人一份，大人手機繩、小朋友專屬禮品。12 格再加 200 元禮券與大獎抽獎資格。" },
+  { i:"tag", t:"兌換", d:"路線圖上有金色標籤的地方可以補給：老街小吃、台車車票、現金券。" },
+  { i:"phn", t:"提醒", d:"進度記在這支手機裡，全程請用同一支。收訊不好照片會自己排隊補傳。" }
 ];
 
 function pageRules(){
@@ -813,6 +814,7 @@ function pageHome(){
     return '<div class="prize' + (got ? "" : " locked") + '">'
       + '<span class="pmark"><b>' + p.at + '</b></span>'
       + '<span class="prize-main"><span class="prize-name">' + esc(label) + '</span>'
+      + (p.desc ? '<span class="prize-desc">' + p.desc + '</span>' : "")
       + '<span class="prize-note">' + note + '</span></span></div>';
   }).join("");
 
