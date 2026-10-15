@@ -77,9 +77,15 @@ tbody tr:hover{background:#FDFAF3}
 .fam-m{font-size:12.5px;color:var(--ink-2)}
 
 .zgroup{margin-bottom:10px}
-.zhead{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
-  padding:9px 12px;border:1px solid var(--edge);border-radius:12px;background:var(--cream-2)}
+.zhead{display:flex;align-items:center;gap:8px;padding:0;overflow:hidden;
+  border:1px solid var(--edge);border-radius:12px;background:var(--cream-2)}
 .zhead:hover{background:#F0E8D6}
+.zhead-t{flex:1 1 auto;display:flex;align-items:center;gap:10px;min-width:0;
+  text-align:left;padding:9px 12px;border:none;background:none;font-family:inherit;cursor:pointer}
+.zok{flex:none;margin-right:8px;font-family:inherit;font-size:12.5px;font-weight:700;
+  padding:6px 12px;border-radius:9px;border:1px solid var(--ink);
+  background:var(--ink);color:#F4F8F2;cursor:pointer;white-space:nowrap}
+.zok:hover{background:#163A28}
 .zhead .cnt{font-size:12.5px;color:var(--ink-2);margin-left:auto}
 .zhead .chev{font-size:11px;color:var(--ink-3);width:12px;text-align:center}
 .zgroup .grid{margin-top:10px;margin-bottom:14px}
@@ -403,18 +409,20 @@ function famBlock(fid){
       ? '<div class="grid">' + g.map(function(t){ return shotCard(fid, tasks[t.id], t); }).join("") + '</div>'
       : "";
 
-    shots += '<div class="zgroup"><button class="zhead" data-zg="' + key + '" data-open="' + (open ? 1 : 0) + '">'
+    shots += '<div class="zgroup"><div class="zhead">'
+      + '<button class="zhead-t" data-zg="' + key + '" data-open="' + (open ? 1 : 0) + '">'
       + '<span class="zone ' + (ZC[z] || "") + '">' + z + '</span>'
       + '<span class="cnt">' + cnt + '</span>'
       + '<span class="chev">' + (open ? "\u25be" : "\u25b8") + '</span>'
-      + '</button>' + cards + '</div>';
+      + '</button>'
+      + (np ? '<button class="zok" data-zok="' + key + '">這區 ' + np + ' 張通過</button>' : "")
+      + '</div>' + cards + '</div>';
   });
 
   var pend = pendOf(f);
   return '<div class="fam"><div class="fam-h">'
     + '<div><div class="fam-n">' + esc(f.name || "未命名") + '</div>'
     + '<div class="fam-m">' + (f.dept ? esc(f.dept) + '　' : '') + '已通過 ' + okOf(f) + ' / ' + TOTAL + '　待審 ' + pend + '　代號 ' + fid + '</div></div>'
-    + (pend ? '<button class="btn ok" data-all="' + fid + '">這組全部通過</button>' : "")
     + '</div>' + shots + '</div>';
 }
 
@@ -472,11 +480,14 @@ function bind(){
     b.onclick = function(){ if(root) root.child(b.dataset.f + "/tasks/" + b.dataset.t + "/status").set(b.dataset.a); };
   });
 
-  each("[data-all]", function(b){
+  each("[data-zok]", function(b){
     b.onclick = function(){
       if(!root) return;
-      var fid = b.dataset.all, tasks = (DATA[fid] || {}).tasks || {}, up = {};
-      Object.keys(tasks).forEach(function(id){ if(tasks[id].status === "pending") up[id + "/status"] = "approved"; });
+      var bits = b.dataset.zok.split("|"), fid = bits[0], z = bits[1];
+      var tasks = (DATA[fid] || {}).tasks || {}, up = {};
+      TASKS.forEach(function(t){
+        if(t.zone === z && tasks[t.id] && tasks[t.id].status === "pending") up[t.id + "/status"] = "approved";
+      });
       if(Object.keys(up).length) root.child(fid + "/tasks").update(up);
     };
   });
