@@ -119,6 +119,16 @@ button{font-family:inherit;font-size:inherit;color:inherit;background:none;borde
 .prize-name{display:block;font-size:14.5px;font-weight:700;color:var(--ink)}
 .prize-desc{display:block;font-size:12.5px;color:var(--ink-2);line-height:1.6;margin:2px 0 3px}
 .prize-note{display:block;font-size:11.5px;color:var(--ink-3);line-height:1.5}
+.prize.got{border-color:var(--gold-line);box-shadow:0 0 0 1px var(--gold-line) inset}
+.prize.got .prize-note{color:var(--act-text);font-weight:700;font-size:12.5px}
+.prize.claimed{background:#EEF4EC;border-color:#C6D8C2}
+.prize.claimed .pmark{background:var(--ink);border-color:var(--ink)}
+.prize.claimed .pmark b{color:#F4F8F2}
+.prize.claimed .prize-name{color:var(--ink)}
+.prize.claimed .prize-desc{color:#5A7059}
+.prize.claimed .prize-note{color:var(--ink);font-weight:700;font-size:12.5px;
+  display:flex;align-items:center;gap:4px}
+.prize.claimed .prize-note svg{width:13px;height:13px}
 .prize.locked{opacity:.6}
 .prize.locked .pmark{background:#F1EADB;border-color:#C6B893}
 .prize.locked .pmark b{color:var(--ink-2)}
@@ -399,6 +409,8 @@ function go(p,a){ view.page=p; view.zone=(a&&a.zone)||null; view.task=(a&&a.task
 function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
 var ICON_CAM  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8.5h3.2l1.3-2h8l1.3 2H20v11H3z"/><circle cx="11.5" cy="13.5" r="3.4"/></svg>';
 var ICON_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg>';
+var ICON_TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"'
+  + ' stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l5 5 9-10"/></svg>';
 var ICON_CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>';
 var ICON_ROUTE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'
   + '<circle cx="6" cy="6" r="2.6"/><circle cx="18" cy="18" r="2.6"/>'
@@ -811,11 +823,12 @@ function pageHome(){
     var claimed = !!remote.claimed["t" + p.at];
     var label = p.name || ("第 " + (i + 1) + " 階段獎勵");
     var note = claimed ? "已領取" : got ? "可領取，請找工作人員" : "還差 " + (p.at - n) + " 張解鎖";
-    return '<div class="prize' + (got ? "" : " locked") + '">'
+    var cls = claimed ? " claimed" : got ? " got" : " locked";
+    return '<div class="prize' + cls + '">'
       + '<span class="pmark"><b>' + p.at + '</b></span>'
       + '<span class="prize-main"><span class="prize-name">' + esc(label) + '</span>'
       + (p.desc ? '<span class="prize-desc">' + p.desc + '</span>' : "")
-      + '<span class="prize-note">' + note + '</span></span></div>';
+      + '<span class="prize-note">' + (claimed ? ICON_TICK : "") + note + '</span></span></div>';
   }).join("");
 
   return brandRow()
