@@ -116,6 +116,22 @@ tbody tr:hover{background:#FDFAF3}
 .b-none{background:#F1EADB;color:var(--ink-2)}
 .empty{color:var(--ink-2);font-size:14px;padding:30px 0}
 
+/* 總覽頁工具列 */
+.tools{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
+.tools input{flex:0 0 230px;font-family:inherit;font-size:14px;padding:9px 12px;
+  border:1px solid var(--edge-2);border-radius:10px;background:#fff;color:var(--ink)}
+.tools input:focus{outline:none;border-color:var(--gold)}
+.qfs{display:flex;gap:6px}
+.qf{font-family:inherit;font-size:12.5px;padding:7px 13px;border-radius:999px;
+  border:1px solid var(--edge-2);background:#fff;color:var(--ink-2);cursor:pointer}
+.qf.on{background:var(--ink);color:#F4F8F2;border-color:var(--ink);font-weight:500}
+.qcnt{font-size:12.5px;color:var(--ink-3);margin-left:auto}
+th.sortable{cursor:pointer;user-select:none;white-space:nowrap}
+th.sortable.on{color:var(--act-text)}
+th.sortable i{font-style:normal;margin-left:5px;font-size:11px;color:var(--ink-3);opacity:.5}
+th.sortable:hover i{opacity:1}
+th.sortable.on i{color:var(--act-text);opacity:1}
+
 .lb{position:fixed;inset:0;background:rgba(28,22,10,.88);display:flex;align-items:center;
   justify-content:center;padding:20px;z-index:9}
 .lb img{max-width:100%;max-height:88vh;object-fit:contain;border-radius:8px}
@@ -175,6 +191,9 @@ var ZC = { "博物館":"z1", "老街":"z2", "瀑布":"z3" };
 
 var db, root, DATA = {}, filter = "overview", connErr = "";
 var zoneOpen = {};   /* 使用者手動展開或收起的紀錄 */
+
+/* 總覽頁的搜尋、快篩與排序 */
+var q = "", quick = "all", sortKey = "ok", sortDir = -1;
 
 document.getElementById("gatelogo").src = LOGO;
 document.getElementById("in").onclick = enter;
@@ -248,19 +267,64 @@ function tab(k, label){
   return '<button class="tab' + (filter === k ? " on" : "") + '" data-tab="' + k + '">' + label + '</button>';
 }
 
+function sortKeys(keys){
+  return keys.sort(function(a, b){
+    var A = DATA[a] || {}, B = DATA[b] || {}, d = 0;
+    if(sortKey === "ok")        d = okOf(A) - okOf(B);
+    else if(sortKey === "pend") d = pendOf(A) - pendOf(B);
+    else if(sortKey === "name") d = String(A.name || "").localeCompare(String(B.name || ""), "zh-Hant");
+    else                        d = (A.createdAt || 0) - (B.createdAt || 0);
+    if(d !== 0) return d * sortDir;
+    return (A.createdAt || 0) - (B.createdAt || 0);
+  });
+}
+
+function th(k, label){
+  var on = sortKey === k;
+  var mark = on ? (sortDir < 0 ? "\u25be" : "\u25b4") : "\u21c5";
+  return '<th class="sortable' + (on ? " on" : "") + '" data-sort="' + k + '"'
+    + ' title="點一下換排序">' + label + '<i>' + mark + '</i></th>';
+}
+
+function qb(k, label){
+  return '<button class="qf' + (quick === k ? " on" : "") + '" data-q="' + k + '">' + label + '</button>';
+}
+
+/* 只動 display，不重畫，打字才不會跳掉焦點 */
+function applyFilter(){
+  var rows = document.querySelectorAll("tr[data-s]");
+  if(!rows.length) return;
+  var key = q.trim().toLowerCase(), shown = 0;
+  for(var i = 0; i < rows.length; i++){
+    var r = rows[i];
+    var hitQ = !key || r.getAttribute("data-s").indexOf(key) >= 0;
+    var hitK = quick === "all" || (" " + r.getAttribute("data-k") + " ").indexOf(" " + quick + " ") >= 0;
+    var show = hitQ && hitK;
+    r.style.display = show ? "" : "none";
+    if(show) shown++;
+  }
+  var c = document.getElementById("qcnt");
+  if(c) c.textContent = "符合 " + shown + " / 共 " + rows.length + " 筆";
+  var none = document.getElementById("qnone");
+  if(none) none.style.display = shown ? "none" : "";
+}
+
 /* ── 總覽：進度與獎品核銷 ── */
 function overview(){
   var keys = Object.keys(DATA);
   if(!keys.length) return '<p class="empty">還沒有人開始，等參加者掃碼進入就會出現。</p>';
 
-  keys.sort(function(a,b){
-    var d = okOf(DATA[b]) - okOf(DATA[a]);
-    return d !== 0 ? d : (DATA[a].createdAt || 0) - (DATA[b].createdAt || 0);
-  });
+  keys = sortKeys(keys);
 
   var rows = keys.map(function(k){
     var f = DATA[k] || {}, ok = okOf(f), pend = pendOf(f), cl = f.claimed || {};
     var pct = Math.round(ok / TOTAL * 100);
+
+    var tags = [];
+    if(pend) tags.push("wait");
+    if(TIERS.some(function(n){ return ok >= n && !cl["t" + n]; })) tags.push("claim");
+    if(TIERS.some(function(n){ return cl["t" + n]; })) tags.push("done");
+    var skey = esc(String((f.name || "") + " " + (f.dept || "") + " " + k).toLowerCase());
 
     var cells = TIERS.map(function(n){
       if(cl["t" + n]) return '<td><span class="done">已發放</span> '
@@ -269,7 +333,7 @@ function overview(){
       return '<td><span class="locked">差 ' + (n - ok) + ' 張</span></td>';
     }).join("");
 
-    return '<tr>'
+    return '<tr data-s="' + skey + '" data-k="' + tags.join(" ") + '">'
       + '<td><div class="unit">' + esc(f.name || "未命名") + '</div><div class="code">' + (f.dept ? esc(f.dept) + '　' : '') + k + '</div></td>'
       + '<td><div class="meter"><i><b style="width:' + pct + '%"></b></i><span>' + ok + ' / ' + TOTAL + '</span></div></td>'
       + '<td><span class="wait' + (pend ? "" : " none") + '">' + (pend ? pend + " 張待審" : "—") + '</span></td>'
@@ -277,12 +341,19 @@ function overview(){
       + '<td><button class="mini del" data-del="' + k + '">刪除</button></td></tr>';
   }).join("");
 
-  return '<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="mini del" id="wipe">清除所有資料</button></div>'
+  return '<div class="tools">'
+    + '<input type="text" id="q" placeholder="搜尋姓名、部門或代號" autocomplete="off">'
+    + '<div class="qfs">' + qb("all", "全部") + qb("wait", "有待審")
+    +   qb("claim", "可發獎") + qb("done", "已發放") + '</div>'
+    + '<span class="qcnt" id="qcnt"></span>'
+    + '<button class="mini del" id="wipe">清除所有資料</button></div>'
     + '<div class="wrap"><table><thead><tr>'
-    + '<th>參加單位・部門</th><th>進度</th><th>待審</th>'
-    + '<th>第一階段 ' + TIERS[0] + ' 張</th><th>第二階段 ' + TIERS[1] + ' 張</th><th></th>'
+    + th("name", "參加單位・部門") + th("ok", "進度") + th("pend", "待審")
+    + '<th>第一階段 ' + TIERS[0] + ' 張</th><th>第二階段 ' + TIERS[1] + ' 張</th>'
+    + th("at", "加入")
     + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
-    + '<p class="sub" style="margin-top:12px">依完成張數排序，快完成的在最上面。核銷後玩家手機會顯示「已領取」，按錯可以按取消還原。</p>';
+    + '<p class="empty" id="qnone" style="display:none">沒有符合的資料。</p>'
+    + '<p class="sub" style="margin-top:12px">點表頭可以換排序，再點一次正反向。核銷後玩家手機會顯示「已領取」，按錯可以按取消還原。</p>';
 }
 
 /* ── 審核清單 ── */
@@ -378,6 +449,25 @@ function shotCard(fid, t, meta){
 function bind(){
   each("[data-tab]", function(b){ b.onclick = function(){ filter = b.dataset.tab; render(); }; });
 
+  var qi = document.getElementById("q");
+  if(qi){
+    qi.value = q;
+    qi.oninput = function(){ q = qi.value; applyFilter(); };
+  }
+
+  each("[data-q]", function(b){
+    b.onclick = function(){ quick = b.dataset.q; render(); };
+  });
+
+  each("[data-sort]", function(b){
+    b.onclick = function(){
+      var k = b.dataset.sort;
+      if(sortKey === k) sortDir = -sortDir;
+      else { sortKey = k; sortDir = (k === "name") ? 1 : -1; }
+      render();
+    };
+  });
+
   each("[data-a]", function(b){
     b.onclick = function(){ if(root) root.child(b.dataset.f + "/tasks/" + b.dataset.t + "/status").set(b.dataset.a); };
   });
@@ -442,6 +532,8 @@ function bind(){
       document.getElementById("lb").classList.remove("hide");
     };
   });
+
+  applyFilter();
 }
 
 document.getElementById("lb").onclick = function(){ this.classList.add("hide"); };
